@@ -10,6 +10,7 @@ dash-html-components = "*"
 dash-core-components = "*"
 plotly = "*"
 dash_dangerously_set_inner_html = "*"
+pandas = "*"
 
 [dev-packages]
 flask = "*"

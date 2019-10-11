@@ -1,5 +1,12 @@
 # Daily fire tally visualization app
 
+## Structure
+
+ * `application.py` contains the main app loop code.
+ * `gui.py` has most user interface elements.
+ * `luts.py` has shared code & lookup tables and other configuration.
+ * `assets/` has images and CSS (uses [Bulma](https://bulma.io))
+
 ## Local development
 
 After cloning this template, run it this way:
@@ -13,6 +20,8 @@ pipenv run flask run
 
 The project is run through Flask and will be available at [http://localhost:5000](http://localhost:5000).
 
+Example data is in the `data/` directory.
+
 ## Deploying to AWS Elastic Beanstalk:
 
 Apps run via WSGI containers on AWS.
@@ -24,6 +33,7 @@ eb init
 eb deploy
 ```
 
-## Source data
+The following env vars must be set:
 
-Example data included in `data/` directory.
+ * `REQUESTS_PATHNAME_PREFIX` - URL fragment so requests are properly routed.
+ * `GTAG_ID` - Google Tag Manager ID
