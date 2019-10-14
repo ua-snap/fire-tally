@@ -110,7 +110,12 @@ about = html.Div(
     children=[
         dcc.Markdown("""
 
-This visualization compares the current year to all high fire years (> 1 million acres burned) since daily tally records began in 2004.  Smaller fire seasons are shown in light grey.  Data are smoothed for improved appearance.  Click the camera icon in the upper-right of the diagram to download a high-res version of this chart.
+This visualization compares the current year to all high fire years (> 1 million acres burned) since daily tally records began in 2004.
+
+ * Smaller fire seasons are shown in light grey.
+ * Data are smoothed for improved appearance.
+ * Click the camera icon in the upper-right of the diagram to download a high-res version of this chart.
+ * The smaller graph with the blue background is a rangefinder which can be used to explore all date ranges.
 
 Source: [Alaska Interagency Coordination Center (AICC)](https://fire.ak.blm.gov).
 

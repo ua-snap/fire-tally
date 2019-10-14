@@ -116,17 +116,24 @@ def update_tally(day_range):
             return False
         return date.strftime("%-j")
 
+    # Make column for day-of-year (doy) and clip older traces
     df["doy"] = df["datetime"].apply(convert_to_doy).astype(int)
     df = df.loc[(df["FireSeason"] >= 2004)]
+
+    # Generate a synthetic datetime field,
+    # with all the same year.  This lets us
+    # give Plotly the x-axis as a date.
+    def collapse_year(date):
+        stacked_date = "2000/{}/{}".format(date.month, date.day)
+        return datetime.strptime(stacked_date, "%Y/%m/%d")
+
+    df = df.assign(date_stacked=pd.to_datetime(df["datetime"].apply(collapse_year), format="%Y-%m-%d"))
+    print(df.date_stacked)
 
     # Chop unused values, further trimming below
     # DOY 268 is the last day there is a daily tally for
     # one of the largest-ever fire seasons, 2015.
     df = df.loc[(df["doy"] >= 91) & (df["doy"] <= 268)]
-    df.to_csv("t.csv")
-
-    # print(day_range)
-    # print(df)
 
     grouped = df.groupby("FireSeason")
     for name, group in grouped:
@@ -159,7 +166,7 @@ def update_tally(day_range):
         data_traces.extend(
             [
                 {
-                    "x": group.doy,
+                    "x": group.date_stacked,
                     "y": group.SmoothedTotalAcres,
                     "mode": mode,
                     "name": str(name),
@@ -196,12 +203,20 @@ def update_tally(day_range):
         legend={"font": {"family": "Open Sans", "size": 10}},
         xaxis=dict(
             title="Date",
-            range=[90, 260],
-            tickmode="array",
-            tickvals=date_ranges,
-            ticktext=date_names,
+            tickformat="%B %d",
+            rangeslider=dict(
+                visible=True,
+                bgcolor="#dfffff",
+                thickness=0.10,
+                bordercolor="#aaaaaa",
+                borderwidth=1
+            ),
+            range=[datetime.strptime("20000615", "%Y%m%d"), datetime.strptime("20000920", "%Y%m%d")]
+            # tickmode="array",
+            # tickvals=date_ranges,
+            # ticktext=date_names,
         ),
-        yaxis={"title": "Acres", "range": [0, 7000000]},
+        yaxis={"title": "Acres"},
         height=650,
         margin={"l": 50, "r": 50, "b": 50, "t": 50, "pad": 4},
     )
