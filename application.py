@@ -16,11 +16,9 @@ import pandas as pd
 
 
 date_ranges = [91, 121, 152, 182, 213, 244]
-print(date_ranges)
 date_names = list(
     map(lambda x: datetime.strptime(str(x), "%j").strftime("%B"), date_ranges)
 )
-print(date_names)
 
 raw_data = pd.read_csv("data/test.csv", index_col=0, parse_dates=True)
 
@@ -127,8 +125,11 @@ def update_tally(day_range):
         stacked_date = "2000/{}/{}".format(date.month, date.day)
         return datetime.strptime(stacked_date, "%Y/%m/%d")
 
-    df = df.assign(date_stacked=pd.to_datetime(df["datetime"].apply(collapse_year), format="%Y-%m-%d"))
-    print(df.date_stacked)
+    df = df.assign(
+        date_stacked=pd.to_datetime(
+            df["datetime"].apply(collapse_year), format="%Y-%m-%d"
+        )
+    )
 
     # Chop unused values, further trimming below
     # DOY 268 is the last day there is a daily tally for
@@ -209,9 +210,12 @@ def update_tally(day_range):
                 bgcolor="#dfffff",
                 thickness=0.10,
                 bordercolor="#aaaaaa",
-                borderwidth=1
+                borderwidth=1,
             ),
-            range=[datetime.strptime("20000615", "%Y%m%d"), datetime.strptime("20000920", "%Y%m%d")]
+            range=[
+                datetime.strptime("20000615", "%Y%m%d"),
+                datetime.strptime("20000920", "%Y%m%d"),
+            ]
             # tickmode="array",
             # tickvals=date_ranges,
             # ticktext=date_names,

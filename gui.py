@@ -108,7 +108,8 @@ UA is an AA/EO employer and educational institution and prohibits illegal discri
 about = html.Div(
     className="section about content is-size-5",
     children=[
-        dcc.Markdown("""
+        dcc.Markdown(
+            """
 
 This visualization compares the current year to all high fire years (> 1 million acres burned) since daily tally records began in 2004.
 
@@ -119,10 +120,15 @@ This visualization compares the current year to all high fire years (> 1 million
 
 Source: [Alaska Interagency Coordination Center (AICC)](https://fire.ak.blm.gov).
 
-""")
-    ]
+"""
+        )
+    ],
 )
 
 layout = html.Div(
-    children=[header, html.Div(className="container", children=[about, main_section]), footer]
+    children=[
+        header,
+        html.Div(className="container", children=[about, main_section]),
+        footer,
+    ]
 )
