@@ -1,3 +1,7 @@
+"""
+GUI for app
+"""
+
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -20,9 +24,21 @@ navbar = html.Div(
     ],
 )
 
+range_slider = dcc.RangeSlider(id="day_range", count=1, min=1, max=365, step=0.5, value=[1, 365])
+range_slider_field = html.Div(
+    className="field",
+    children=[
+        html.Label("Range Slider", className="label"),
+        html.Div(className="control", children=[range_slider]),
+    ],
+)
+
 main_section = html.Div(
     className="section",
-    children=[],
+    children=[
+        html.Div(className="graph", children=[dcc.Graph(id="tally")]),
+        range_slider_field
+    ],
 )
 
 footer = html.Footer(
