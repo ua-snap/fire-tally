@@ -13,3 +13,34 @@ h1, h2, h3, h4, h5, h6 {
 .control label.checkbox {
 	display: block;
 }
+
+.header .logo img {
+	float: left;
+	height: 8rem;
+	margin-right: 2rem;
+	position: relative;
+	bottom: 1.5rem;
+}
+
+.about {
+	margin-bottom: -3rem !important;
+}
+
+.hidden {
+	display: none;
+}
+
+.footer a {
+	display: inline-block;
+	margin: 1rem 1.5rem 2rem;
+}
+
+.footer img {
+	height: 4em;
+	max-height: 4em;
+}
+
+.footer img.snap {
+	display: relative;
+	bottom: 2rem;
+}

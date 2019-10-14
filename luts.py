@@ -3,10 +3,10 @@
 Common shared text strings and lookup tables.
 """
 
-title = "SNAP Dash app"
+title = "Alaska Wildfire Daily Tally Count, 2004-Present"
 url = "http://snap.uaf.edu/tools/demo"
 preview = "http://snap.uaf.edu/tools/demo/assets/preview.png"
-description = "SNAP Dash app demo template"
+description = "This visualization compares the current year to all high fire years (> 1 million acres burned) since daily tally records began in 2004."
 
 default_style = {"color": "rgba(0, 0, 0, 0.25)", "width": 1}
 

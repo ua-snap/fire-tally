@@ -103,20 +103,26 @@ app.layout = layout
 
 @app.callback(Output("tally", "figure"), [Input("day_range", "value")])
 def update_tally(day_range):
-    """ Regenerate plot data for area burned """
+    """ Generate daily tally count """
     data_traces = []
     df = raw_data
     df["datetime"] = pd.to_datetime(
         df["SitReportDate"], format="%Y%m%d", errors="coerce"
     )
 
+    # Needed if any of the input data has broken date formatting.
     def convert_to_doy(date):
         if date == np.datetime64("NaT"):
-            return NaN
+            return False
         return date.strftime("%-j")
 
     df["doy"] = df["datetime"].apply(convert_to_doy).astype(int)
     df = df.loc[(df["FireSeason"] >= 2004)]
+
+    # Chop unused values, further trimming below
+    # DOY 268 is the last day there is a daily tally for
+    # one of the largest-ever fire seasons, 2015.
+    df = df.loc[(df["doy"] >= 91) & (df["doy"] <= 268)]
     df.to_csv("t.csv")
 
     # print(day_range)
@@ -125,14 +131,23 @@ def update_tally(day_range):
     grouped = df.groupby("FireSeason")
     for name, group in grouped:
         group = group.sort_values(["doy"])
-        z = sm.nonparametric.lowess(
-            group.TotalAcres,
-            group.doy,
-            return_sorted=False,
-            frac=0.05,
-            it=1,
-            delta=3
+
+        # Apply LOESS filter to smooth the data.
+        # https://www.statsmodels.org/dev/generated/statsmodels.nonparametric.smoothers_lowess.lowess.html
+        group = group.assign(
+            SmoothedTotalAcres=sm.nonparametric.lowess(
+                group.TotalAcres,
+                group.doy,
+                return_sorted=False,
+                frac=0.05,
+                it=1,
+                delta=3,
+            )
         )
+        group["SmoothedTotalAcres"] = group["SmoothedTotalAcres"].apply(
+            lambda x: x if x >= 0 else 0
+        )
+
         if name in luts.important_years:
             hoverinfo = ""
             showlegend = True
@@ -145,19 +160,35 @@ def update_tally(day_range):
             [
                 {
                     "x": group.doy,
-                    "y": z,
+                    "y": group.SmoothedTotalAcres,
                     "mode": mode,
                     "name": str(name),
                     "line": {
                         "color": luts.years_lines_styles[str(name)]["color"],
                         "shape": "spline",
-                        "width": luts.years_lines_styles[str(name)]["width"]
+                        "width": luts.years_lines_styles[str(name)]["width"],
                     },
                     "showlegend": showlegend,
-                    "hoverinfo": hoverinfo
+                    "hoverinfo": hoverinfo,
                 }
             ]
         )
+
+    # Add dummy trace with legend entry for non-big years
+    data_traces.extend(
+        [
+            go.Scatter(
+                x=[None],
+                y=[None],
+                mode="lines",
+                name="Other years",
+                line={
+                    "color": luts.default_style["color"],
+                    "width": luts.default_style["width"],
+                },
+            )
+        ]
+    )
 
     graph_layout = go.Layout(
         title="Daily Tally",
@@ -170,7 +201,7 @@ def update_tally(day_range):
             tickvals=date_ranges,
             ticktext=date_names,
         ),
-        yaxis={"title": "Acres"},
+        yaxis={"title": "Acres", "range": [0, 7000000]},
         height=650,
         margin={"l": 50, "r": 50, "b": 50, "t": 50, "pad": 4},
     )
