@@ -1,4 +1,4 @@
-# pylint: disable=C0103
+# pylint: disable=C0103,C0301
 """
 GUI for app
 """
@@ -111,14 +111,22 @@ about = html.Div(
         dcc.Markdown(
             """
 
-This visualization compares the current year's daily tally of acres burned to all high fire years (> 1 million acres burned) since daily tally records began in 2004.
+This chart compares the current year's daily tally of acres burned to all high fire years (> 1 million acres burned) since daily tally records began in 2004.  Click camera icon at upper right of diagram to download chart.
 
- * Smaller fire seasons are shown in light grey.
- * Data are smoothed for improved appearance.
- * Click the camera icon in the upper-right of the diagram to download a high-res version of this chart.
- * The smaller graph with the blue background is a rangefinder which can be used to explore all date ranges.
+"""
+        )
+    ],
+)
 
-Source: [Alaska Interagency Coordination Center (AICC)](https://fire.ak.blm.gov).
+after_chart = html.Div(
+    className="section about-after content is-size-5",
+    children=[
+        dcc.Markdown(
+            """
+
+ * Use sliders above to explore all date ranges.
+ * Daily tallies go up or down as improved estimates and data become available throughout the fire season.
+ * Data provided by the [Alaska Interagency Coordination Center (AICC)](https://fire.ak.blm.gov).
 
 """
         )
@@ -128,7 +136,7 @@ Source: [Alaska Interagency Coordination Center (AICC)](https://fire.ak.blm.gov)
 layout = html.Div(
     children=[
         header,
-        html.Div(className="container", children=[about, main_section]),
+        html.Div(className="container", children=[about, main_section, after_chart]),
         footer,
     ]
 )

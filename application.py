@@ -148,13 +148,12 @@ def update_tally(day_range):
             hoverinfo = "skip"
             showlegend = False
 
-        mode = "lines+markers" if name == 2019 else "lines"
         data_traces.extend(
             [
                 {
                     "x": group.date_stacked,
                     "y": group.SmoothedTotalAcres,
-                    "mode": mode,
+                    "mode": "lines",
                     "name": str(name),
                     "line": {
                         "color": luts.years_lines_styles[str(name)]["color"],
@@ -184,7 +183,7 @@ def update_tally(day_range):
     )
 
     graph_layout = go.Layout(
-        title="Daily Tally",
+        title="Daily Tally Records, 2004-Present",
         showlegend=True,
         legend={"font": {"family": "Open Sans", "size": 10}},
         xaxis=dict(
@@ -202,7 +201,10 @@ def update_tally(day_range):
                 datetime.strptime("20000920", "%Y%m%d"),
             ]
         ),
-        yaxis={"title": "Acres Burned"},
+        yaxis={
+            "title": "Acres burned (millions)",
+            "hoverformat": ".3s"
+        },
         height=650,
         margin={"l": 50, "r": 50, "b": 50, "t": 50, "pad": 4},
     )
