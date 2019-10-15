@@ -111,8 +111,9 @@ def update_tally(day_range):
     def collapse_year(date):
         stacked_date = "2000/{}/{}".format(date.month, date.day)
         return datetime.strptime(stacked_date, "%Y/%m/%d")
-    df["datetime"] = pd.to_datetime(
-        df["SitReportDate"], format="%Y%m%d", errors="coerce"
+
+    df = df.assign(
+        datetime=pd.to_datetime(df["SitReportDate"], format="%Y%m%d", errors="coerce")
     )
     df = df.assign(
         date_stacked=pd.to_datetime(
@@ -122,14 +123,14 @@ def update_tally(day_range):
 
     grouped = df.groupby("FireSeason")
     for name, group in grouped:
-        group = group.sort_values(["doy"])
+        group = group.sort_values(["date_stacked"])
 
         # Apply LOESS filter to smooth the data.
         # https://www.statsmodels.org/dev/generated/statsmodels.nonparametric.smoothers_lowess.lowess.html
         group = group.assign(
             SmoothedTotalAcres=sm.nonparametric.lowess(
                 group.TotalAcres,
-                group.doy,
+                group.date_stacked,
                 return_sorted=False,
                 frac=0.05,
                 it=1,
