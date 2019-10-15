@@ -201,11 +201,8 @@ def update_tally(day_range):
                 datetime.strptime("20000615", "%Y%m%d"),
                 datetime.strptime("20000920", "%Y%m%d"),
             ]
-            # tickmode="array",
-            # tickvals=date_ranges,
-            # ticktext=date_names,
         ),
-        yaxis={"title": "Acres"},
+        yaxis={"title": "Acres Burned"},
         height=650,
         margin={"l": 50, "r": 50, "b": 50, "t": 50, "pad": 4},
     )
