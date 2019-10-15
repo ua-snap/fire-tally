@@ -111,7 +111,7 @@ about = html.Div(
         dcc.Markdown(
             """
 
-This visualization compares the current year to all high fire years (> 1 million acres burned) since daily tally records began in 2004.
+This visualization compares the current year's daily tally of acres burned to all high fire years (> 1 million acres burned) since daily tally records began in 2004.
 
  * Smaller fire seasons are shown in light grey.
  * Data are smoothed for improved appearance.
