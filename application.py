@@ -5,7 +5,6 @@ Template for SNAP Dash apps.
 
 import os
 from datetime import datetime
-import numpy as np
 import statsmodels.api as sm
 import dash
 from dash.dependencies import Input, Output
@@ -104,18 +103,6 @@ def update_tally(day_range):
     """ Generate daily tally count """
     data_traces = []
     df = raw_data
-    df["datetime"] = pd.to_datetime(
-        df["SitReportDate"], format="%Y%m%d", errors="coerce"
-    )
-
-    # Needed if any of the input data has broken date formatting.
-    def convert_to_doy(date):
-        if date == np.datetime64("NaT"):
-            return False
-        return date.strftime("%-j")
-
-    # Make column for day-of-year (doy) and clip older traces
-    df["doy"] = df["datetime"].apply(convert_to_doy).astype(int)
     df = df.loc[(df["FireSeason"] >= 2004)]
 
     # Generate a synthetic datetime field,
@@ -124,17 +111,14 @@ def update_tally(day_range):
     def collapse_year(date):
         stacked_date = "2000/{}/{}".format(date.month, date.day)
         return datetime.strptime(stacked_date, "%Y/%m/%d")
-
+    df["datetime"] = pd.to_datetime(
+        df["SitReportDate"], format="%Y%m%d", errors="coerce"
+    )
     df = df.assign(
         date_stacked=pd.to_datetime(
             df["datetime"].apply(collapse_year), format="%Y-%m-%d"
         )
     )
-
-    # Chop unused values, further trimming below
-    # DOY 268 is the last day there is a daily tally for
-    # one of the largest-ever fire seasons, 2015.
-    df = df.loc[(df["doy"] >= 91) & (df["doy"] <= 268)]
 
     grouped = df.groupby("FireSeason")
     for name, group in grouped:
