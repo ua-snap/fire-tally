@@ -38,18 +38,46 @@ fig_configs = dict(
     displaylogo=False,
 )
 
+# We want this HTML structure to get the full-width background color:
+# <div class="header">
+#   <div class="container"> gives us the centered column
+#     <div class="section"> a bit more padding to stay consistent with form
 header = html.Div(
-    className="header section",
+    className="header",
     children=[
         html.Div(
+            className="container",
             children=[
-                html.A(
-                    className="logo",
-                    href="#",
-                    children=[html.Img(src="assets/AFSC_color.svg")],
-                ),
-                html.H1(luts.title, className="title is-h4"),
-            ]
+                html.Div(
+                    className="section header--section",
+                    children=[
+                        html.Div(
+                            className="header--logo",
+                            children=[
+                                html.A(
+                                    className="header--snap-link",
+                                    href="#",
+                                    children=[
+                                        html.Img(
+                                            src=path_prefix
+                                            + "assets/SNAP_acronym_color_square.svg"
+                                        )
+                                    ],
+                                )
+                            ],
+                        ),
+                        html.Div(
+                            className="header--titles",
+                            children=[
+                                html.H1(
+                                    luts.title,
+                                    className="title is-3",
+                                )
+                            ],
+                        ),
+                    ],
+                )
+            ],
         )
     ],
 )
