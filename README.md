@@ -14,7 +14,7 @@ After cloning this template, run it this way:
 ```
 pipenv install
 export FLASK_APP=application.py
-export FLASK_DEBUG=1
+export FLASK_DEBUG=True
 pipenv run flask run
 ```
 
@@ -36,4 +36,7 @@ eb deploy
 The following env vars must be set:
 
  * `REQUESTS_PATHNAME_PREFIX` - URL fragment so requests are properly routed.
+ * `TALLY_DATA_URL` - URL to source data CSV
  * `GTAG_ID` - Google Tag Manager ID
+
+For local development, set `FLASK_DEBUG` to `True`.  This will use a local file for source data and enable other debugging tools.

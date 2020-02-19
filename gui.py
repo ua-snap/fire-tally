@@ -9,7 +9,7 @@ import dash_html_components as html
 import luts
 
 # For hosting
-path_prefix = os.environ["REQUESTS_PATHNAME_PREFIX"]
+path_prefix = os.getenv("REQUESTS_PATHNAME_PREFIX") or "/"
 
 # Used to make the chart exports nice
 fig_download_configs = dict(filename="Daily_Tally_Count", width="1000", scale=2)

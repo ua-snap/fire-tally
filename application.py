@@ -13,28 +13,38 @@ import luts
 from gui import layout
 import pandas as pd
 
+import ssl
+
+# Bypass SSL certification check for the AICC server
+# Remove if/when they address that configuration
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    # Legacy Python that doesn't verify HTTPS certificates by default
+    pass
+else:
+    # Handle target environment that doesn't support HTTPS verification
+    ssl._create_default_https_context = _create_unverified_https_context
+
+if "FLASK_DEBUG" in os.environ and os.environ["FLASK_DEBUG"] is True:
+    TALLY_DATA_URL = "./data/test.csv"  # for local development
+else:
+    # in production, load from live URL
+    # Probably here: https://fire.ak.blm.gov/content/aicc/Statistics%20Directory/Alaska%20Daily%20Stats%20-%202004%20to%20Present.csv
+    TALLY_DATA_URL = os.environ["TALLY_DATA_URL"]
 
 date_ranges = [91, 121, 152, 182, 213, 244]
 date_names = list(
     map(lambda x: datetime.strptime(str(x), "%j").strftime("%B"), date_ranges)
 )
 
-raw_data = pd.read_csv("data/test.csv", index_col=0, parse_dates=True)
+raw_data = pd.read_csv(TALLY_DATA_URL, index_col=0, parse_dates=True)
 
-# We set the requests_pathname_prefix to enable
-# custom URLs.
-# https://community.plot.ly/t/dash-error-loading-layout/8139/6
-app = dash.Dash(
-    __name__, requests_pathname_prefix=os.environ["REQUESTS_PATHNAME_PREFIX"]
-)
+app = dash.Dash(__name__)
 
 # AWS Elastic Beanstalk looks for application by default,
 # if this variable (application) isn't set you will get a WSGI error.
 application = app.server
-
-# The next config sets a relative base path so we can deploy
-# with custom URLs.
-# https://community.plot.ly/t/dash-error-loading-layout/8139/6
 
 # Customize this layout to include Google Analytics
 gtag_id = os.environ["GTAG_ID"]
@@ -199,12 +209,9 @@ def update_tally(day_range):
             range=[
                 datetime.strptime("20000615", "%Y%m%d"),
                 datetime.strptime("20000920", "%Y%m%d"),
-            ]
+            ],
         ),
-        yaxis={
-            "title": "Acres burned (millions)",
-            "hoverformat": ".3s"
-        },
+        yaxis={"title": "Acres burned (millions)", "hoverformat": ".3s"},
         height=650,
         margin={"l": 50, "r": 50, "b": 50, "t": 50, "pad": 4},
     )

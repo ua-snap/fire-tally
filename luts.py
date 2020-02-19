@@ -27,5 +27,6 @@ years_lines_styles = {
     "2016": default_style,
     "2017": default_style,
     "2018": default_style,
-    "2019": {"color": "rgba(10, 25, 0, .85)", "width": "4"},
+    "2019": {"color": "rgba(10, 255, 128, .85)", "width": "2"},
+    "2020": {"color": "rgba(10, 25, 0, .85)", "width": "4"},
 }
