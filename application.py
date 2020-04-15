@@ -17,6 +17,7 @@ import ssl
 
 # Bypass SSL certification check for the AICC server
 # Remove if/when they address that configuration
+# TODO -- verify if this is still needed after AICC update
 try:
     _create_unverified_https_context = ssl._create_unverified_context
 except AttributeError:
@@ -26,19 +27,45 @@ else:
     # Handle target environment that doesn't support HTTPS verification
     ssl._create_default_https_context = _create_unverified_https_context
 
-if "FLASK_DEBUG" in os.environ and os.environ["FLASK_DEBUG"] is True:
+if "FLASK_DEBUG" in os.environ and os.environ["FLASK_DEBUG"] == "True":
     TALLY_DATA_URL = "./data/test.csv"  # for local development
 else:
     # in production, load from live URL
     # Probably here: https://fire.ak.blm.gov/content/aicc/Statistics%20Directory/Alaska%20Daily%20Stats%20-%202004%20to%20Present.csv
     TALLY_DATA_URL = os.environ["TALLY_DATA_URL"]
 
+# TODO I think this is unused, can remove during further review?
 date_ranges = [91, 121, 152, 182, 213, 244]
 date_names = list(
     map(lambda x: datetime.strptime(str(x), "%j").strftime("%B"), date_ranges)
 )
 
+# Perform basic data pre-processing
 raw_data = pd.read_csv(TALLY_DATA_URL, index_col=0, parse_dates=True)
+
+df = raw_data
+df = df.loc[(df["FireSeason"] >= 2004)]
+
+# Generate a synthetic datetime field,
+# with all the same year.  This lets us
+# give Plotly the x-axis as a date.
+def collapse_year(date):
+    stacked_date = "2000/{}/{}".format(date.month, date.day)
+    return datetime.strptime(stacked_date, "%Y/%m/%d")
+
+df = df.assign(
+    datetime=pd.to_datetime(df["SitReportDate"], format="%Y%m%d", errors="coerce")
+)
+df = df.assign(
+    date_stacked=pd.to_datetime(
+        df["datetime"].apply(collapse_year), format="%Y-%m-%d"
+    )
+)
+df = df.assign(
+    doy=df["datetime"].dt.strftime("%j").astype("int")
+)
+
+data_start_doy = 92  # April 1
 
 app = dash.Dash(__name__)
 
@@ -111,29 +138,22 @@ app.layout = layout
 @app.callback(Output("tally", "figure"), [Input("day_range", "value")])
 def update_tally(day_range):
     """ Generate daily tally count """
+
+    today_doy = int(datetime.now().strftime("%j"))
+
+    # Slice for April 1 (Day 92) - today.  Show 45 days minimum.
+    end_doy = today_doy if (today_doy - data_start_doy) >= 45 else data_start_doy + 45
+    de = df  # copy for local slicing
+    de = de.loc[
+        (de["doy"] >= data_start_doy) & (de["doy"] <= end_doy)
+    ]
+
     data_traces = []
-    df = raw_data
-    df = df.loc[(df["FireSeason"] >= 2004)]
-
-    # Generate a synthetic datetime field,
-    # with all the same year.  This lets us
-    # give Plotly the x-axis as a date.
-    def collapse_year(date):
-        stacked_date = "2000/{}/{}".format(date.month, date.day)
-        return datetime.strptime(stacked_date, "%Y/%m/%d")
-
-    df = df.assign(
-        datetime=pd.to_datetime(df["SitReportDate"], format="%Y%m%d", errors="coerce")
-    )
-    df = df.assign(
-        date_stacked=pd.to_datetime(
-            df["datetime"].apply(collapse_year), format="%Y-%m-%d"
-        )
-    )
-
-    grouped = df.groupby("FireSeason")
+    grouped = de.groupby("FireSeason")
     for name, group in grouped:
         group = group.sort_values(["date_stacked"])
+
+        # If there's enough data points, smooth with LOESS.
 
         # Apply LOESS filter to smooth the data.
         # https://www.statsmodels.org/dev/generated/statsmodels.nonparametric.smoothers_lowess.lowess.html
@@ -147,6 +167,7 @@ def update_tally(day_range):
                 delta=3,
             )
         )
+        # Handle some odd values that showed up in raw data.
         group["SmoothedTotalAcres"] = group["SmoothedTotalAcres"].apply(
             lambda x: x if x >= 0 else 0
         )
@@ -198,20 +219,9 @@ def update_tally(day_range):
         legend={"font": {"family": "Open Sans", "size": 10}},
         xaxis=dict(
             title="Date",
-            tickformat="%B %d",
-            rangeslider=dict(
-                visible=True,
-                bgcolor="#dfffff",
-                thickness=0.10,
-                bordercolor="#aaaaaa",
-                borderwidth=1,
-            ),
-            range=[
-                datetime.strptime("20000615", "%Y%m%d"),
-                datetime.strptime("20000920", "%Y%m%d"),
-            ],
+            tickformat="%B %d"
         ),
-        yaxis={"title": "Acres burned (millions)", "hoverformat": ".3s"},
+        yaxis={"title": "Acres burned", "hoverformat": ".3s"},
         height=650,
         margin={"l": 50, "r": 50, "b": 50, "t": 50, "pad": 4},
     )
