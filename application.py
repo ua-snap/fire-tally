@@ -163,7 +163,7 @@ def update_tally(area):
         print(de)
     else:
         de = df.loc[
-            (de["ProtectionUnit"] == area)
+            (df["ProtectionUnit"] == area)
         ]
 
     data_traces = []
