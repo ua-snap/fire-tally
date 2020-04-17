@@ -54,6 +54,10 @@ a.header--snap-link {
 	display: none;
 }
 
+#area {
+	max-width: 15rem;
+}
+
 .footer a {
 	display: inline-block;
 	margin: 1rem 1.5rem 2rem;
