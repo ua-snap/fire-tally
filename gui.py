@@ -4,6 +4,7 @@ GUI for app
 """
 
 import os
+from datetime import datetime
 import dash_core_components as dcc
 import dash_html_components as html
 import luts
@@ -78,18 +79,30 @@ header = html.Div(
 )
 
 # Hidden for now, will probably need this later in dev tho.
-# TODO -- consider this instead of the built-in version
 # that doesn't work.
-# range_slider = dcc.RangeSlider(
-#     id="day_range", count=1, min=1, max=365, step=0.5, value=[1, 365]
-# )
-# range_slider_field = html.Div(
-#     className="field hidden",
-#     children=[
-#         html.Label("Range Slider", className="label"),
-#         html.Div(className="control", children=[range_slider]),
-#     ],
-# )
+# Mark the steps by day of year.
+date_ranges = [91, 121, 152, 182, 213, 243, 275]
+date_names = list(
+    map(lambda x: datetime.strptime(str(x), "%j").strftime("%-B"), date_ranges)
+)
+date_marks = dict(zip(date_ranges, date_names))
+range_slider = dcc.RangeSlider(
+    id="day_range",
+    marks=date_marks,
+    count=1,
+    min=91,
+    max=275,
+    step=1,
+    pushable=45,  # minimum date range span
+    value=[luts.default_date_range[0], luts.default_date_range[1]],
+)
+range_slider_field = html.Div(
+    className="field",
+    children=[
+        html.Label("Select date range", className="label"),
+        html.Div(className="control", children=[range_slider]),
+    ],
+)
 
 zone_dropdown = dcc.Dropdown(
     id="area",
@@ -104,21 +117,41 @@ zone_dropdown_field = html.Div(
     ],
 )
 
-main_section = html.Div(
-    className="section",
-    children=[
-        html.Div(
-            className="container",
-            children=[
-                zone_dropdown_field,
-                html.Div(
-                    className="graph",
-                    children=[dcc.Graph(id="tally", config=fig_configs)],
-                )
-            ],
-        )
-    ],
+
+def wrap_in_section(content):
+    """
+    Helper function to wrap sections.
+    Accepts an array of children which will be assigned within
+    this structure:
+    <section class="section">
+        <div class="container">
+            <div>[children]...
+    """
+    return html.Section(
+        className="section",
+        children=[
+            html.Div(className="container", children=[html.Div(children=content)])
+        ],
+    )
+
+
+# Daily Tally, statewide only
+# TODO add header, info text, appropriate CSS
+tally_graph = wrap_in_section(
+    [dcc.Graph(id="tally", config=fig_configs), range_slider_field]
 )
+
+# Daily Tally by Protection Zone
+# TODO add header, info text, appropriate CSS
+tally_zone_graph = wrap_in_section(
+    [
+        zone_dropdown_field,
+        html.Div(
+            className="graph", children=[dcc.Graph(id="tally-zone", config=fig_configs)]
+        ),
+    ]
+)
+
 
 footer = html.Footer(
     className="footer has-text-centered",
@@ -181,7 +214,7 @@ layout = html.Div(
         header,
         html.Div(
             className="container",
-            children=[about, main_section, after_chart],
+            children=[about, tally_graph, tally_zone_graph, after_chart],
         ),
         footer,
     ]
