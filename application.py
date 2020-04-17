@@ -1,4 +1,4 @@
-# pylint: disable=C0103,E0401
+# pylint: disable=C0103,C0301,E0401
 """
 Template for SNAP Dash apps.
 """
@@ -29,51 +29,95 @@ else:
     ssl._create_default_https_context = _create_unverified_https_context
 
 if "FLASK_DEBUG" in os.environ and os.environ["FLASK_DEBUG"] == "True":
-    TALLY_DATA_URL = "./data/test-areas.csv"  # for local development
+    # TODO add logging
+    print("Using debug mode.")  # keep until logging implemented
+    TALLY_DATA_URL = "./data/test.csv"  # for local development
+    TALLY_DATA_ZONES_URL = "./data/test-areas.csv"  # for local development
 else:
     # in production, load from live URL
-    # Probably here: https://fire.ak.blm.gov/content/aicc/Statistics%20Directory/Alaska%20Daily%20Stats%20by%20Protection-2004%20to%20Present.csv
+    # Probably this: https://fire.ak.blm.gov/content/aicc/Statistics%20Directory/Alaska%20Daily%20Stats%20-%202004%20to%20Present.csv
     TALLY_DATA_URL = os.environ["TALLY_DATA_URL"]
+    # Probably this: https://fire.ak.blm.gov/content/aicc/Statistics%20Directory/Alaska%20Daily%20Stats%20by%20Protection-2004%20to%20Present.csv
+    TALLY_DATA_ZONES_URL = os.environ["TALLY_DATA_ZONES_URL"]
 
-# TODO I think this is unused, can remove during further review?
-date_ranges = [91, 121, 152, 182, 213, 244]
-date_names = list(
-    map(lambda x: datetime.strptime(str(x), "%j").strftime("%B"), date_ranges)
-)
 
-# Perform basic data pre-processing
-raw_data = pd.read_csv(TALLY_DATA_URL, parse_dates=True)
-
-df = raw_data
-df = df.drop(columns=["ID", "Month", "Day", "NewFires", "OutFires", "ActiveFires", "TotalFires", "PrepLevel", "StaffedFires"])
-df = df.loc[(df["FireSeason"] >= 2004)]
-
-# Generate a synthetic datetime field,
-# with all the same year.  This lets us
-# give Plotly the x-axis as a date.
 def collapse_year(date):
+    """
+    Generate a synthetic datetime field,
+    with all the same year.  This lets us
+    give Plotly the x-axis as a date.
+    """
+
     try:
         d = datetime.strptime(str(date), "%Y%m%d")
         d = d.replace(year=2020)
     except:
         # Invalid date, return a null to be dropped
-        print("Invalid date found", date)
+        print("Invalid date found", date)  # keep until logging added
         d = np.NaN
 
     return d
 
-df = df.assign(
-    date_stacked=pd.to_datetime(
-        df["SitReportDate"].apply(collapse_year)
-    )
-)
-df = df.dropna()
-df = df.drop(columns=["SitReportDate"])
 
-# Create day-of-year column for easy slicing
-df = df.assign(
-    doy=df["date_stacked"].dt.strftime("%j").astype("int")
+def preprocess_data(csv):
+    """
+    Perform basic data preprocessing,
+    mostly the same regardless of if it's
+    coming from the statewide or aggregate data.
+    """
+    df = csv
+
+    df = df.loc[(df["FireSeason"] >= 2004)]
+
+    df = df.assign(
+        date_stacked=pd.to_datetime(df["SitReportDate"].apply(collapse_year))
+    )
+
+    df = df.dropna()
+    df = df.drop(columns=["SitReportDate"])
+
+    # Create day-of-year column for easy slicing
+    df = df.assign(doy=df["date_stacked"].dt.strftime("%j").astype("int"))
+    return df
+
+
+# Ready & preprocess data
+# TODO make this more resiliant when network exceptions occur
+# TODO add logging
+# TODO ensure this runs on a schedule in a long-running flask loop
+tally_raw = pd.read_csv(TALLY_DATA_URL, parse_dates=True)
+tally_raw = tally_raw.drop(
+    columns=[
+        "ID",
+        "Month",
+        "Day",
+        "TotalFires",
+        "HumanFires",
+        "HumanAcres",
+        "LightningFires",
+        "LightningAcres",
+        "PrepLevel",
+        "Active Fires",
+        "Staffed Fires",
+    ]
 )
+tally = preprocess_data(tally_raw)
+
+tally_zone_raw = pd.read_csv(TALLY_DATA_ZONES_URL, parse_dates=True)
+tally_zone_raw = tally_zone_raw.drop(
+    columns=[
+        "ID",
+        "Month",
+        "Day",
+        "NewFires",
+        "OutFires",
+        "ActiveFires",
+        "TotalFires",
+        "PrepLevel",
+        "StaffedFires",
+    ]
+)
+tally_zone = preprocess_data(tally_zone_raw)
 
 # A few more fields/flags
 data_start_doy = 92  # April 1
@@ -147,24 +191,109 @@ app.title = luts.title
 app.layout = layout
 
 
-@app.callback(Output("tally", "figure"), [Input("area", "value")])
-def update_tally(area):
+@app.callback(Output("tally", "figure"), [Input("day_range", "value")])
+def update_tally(day_range):
+    """ Generate daily tally count """
+    data_traces = []
+
+    #  Slice by day range.
+    sliced = tally.loc[(tally.doy >= day_range[0]) & (tally.doy <= day_range[1])]
+
+    grouped = sliced.groupby("FireSeason")
+    for name, group in grouped:
+        group = group.sort_values(["date_stacked"])
+
+        # Apply LOESS filter to smooth the data.
+        # https://www.statsmodels.org/dev/generated/statsmodels.nonparametric.smoothers_lowess.lowess.html
+        # TODO this will throw warnings if the date range is small,
+        # consider disabling for smaller (~45) day spans, or something.
+        group = group.assign(
+            SmoothedTotalAcres=sm.nonparametric.lowess(
+                group.TotalAcres,
+                group.date_stacked,
+                return_sorted=False,
+                frac=0.05,
+                it=1,
+                delta=3,
+            )
+        )
+        group["SmoothedTotalAcres"] = group["SmoothedTotalAcres"].apply(
+            lambda x: x if x >= 0 else 0
+        )
+
+        if name in luts.important_years:
+            hoverinfo = ""
+            showlegend = True
+        else:
+            hoverinfo = "skip"
+            showlegend = False
+
+        data_traces.extend(
+            [
+                {
+                    "x": group.date_stacked,
+                    "y": group.SmoothedTotalAcres,
+                    "mode": "lines",
+                    "name": str(name),
+                    "line": {
+                        "color": luts.years_lines_styles[str(name)]["color"],
+                        "shape": "spline",
+                        "width": luts.years_lines_styles[str(name)]["width"],
+                    },
+                    "showlegend": showlegend,
+                    "hoverinfo": hoverinfo,
+                }
+            ]
+        )
+
+    # Add dummy trace with legend entry for non-big years
+    data_traces.extend(
+        [
+            go.Scatter(
+                x=[None],
+                y=[None],
+                mode="lines",
+                name="Other years",
+                line={
+                    "color": luts.default_style["color"],
+                    "width": luts.default_style["width"],
+                },
+            )
+        ]
+    )
+
+    graph_layout = go.Layout(
+        title="<b>Alaska Statewide Daily Tally Records, 2004-Present,</b><br>"
+        + datetime.strptime(str(day_range[0]), "%j").strftime("%B %-d")
+        + "—"
+        + datetime.strptime(str(day_range[1]), "%j").strftime("%B %-d"),
+        showlegend=True,
+        legend={"font": {"family": "Open Sans", "size": 10}},
+        xaxis=dict(title="Date", tickformat="%B %-d"),
+        # TODO hoverformat is giving weird numbers in some cases,
+        # like "300m", what's up with that.
+        yaxis={"title": "Acres burned (millions)", "hoverformat": ".3s"},
+        height=650,
+        margin={"l": 50, "r": 50, "b": 50, "t": 50, "pad": 4},
+    )
+    return {"data": data_traces, "layout": graph_layout}
+
+
+@app.callback(Output("tally-zone", "figure"), [Input("area", "value")])
+def update_tally_zone(area):
     """ Generate daily tally count """
 
-    # Slice for April 1 (Day 92) - today.  Show 45 days minimum.
-    # TODO -- lines below are commented out for intial work,
-    # but, we do need to be determining how this should work.
-    # today_doy = int(datetime.now().strftime("%j"))
-    # end_doy = today_doy if (today_doy - data_start_doy) >= 45 else data_start_doy + 45
+    # TODO -- add date range selector.
 
     # Spatial clip
     if area == "ALL":
-        de = df.groupby(["FireSeason", "doy", "date_stacked"]).sum().reset_index()
-        print(de)
+        de = (
+            tally_zone.groupby(["FireSeason", "doy", "date_stacked"])
+            .sum()
+            .reset_index()
+        )
     else:
-        de = df.loc[
-            (df["ProtectionUnit"] == area)
-        ]
+        de = tally_zone.loc[(tally_zone["ProtectionUnit"] == area)]
 
     data_traces = []
     grouped = de.groupby("FireSeason")
@@ -194,7 +323,6 @@ def update_tally(area):
                 lambda x: x if x >= 0 else 0
             )
             acres = group.SmoothedTotalAcres
-
 
         # Only put high-fire years in the legend.
         if name in luts.important_years:
@@ -246,10 +374,7 @@ def update_tally(area):
         title="Daily Tally Records, 2004-Present",
         showlegend=True,
         legend={"font": {"family": "Open Sans", "size": 10}},
-        xaxis=dict(
-            title="Date",
-            tickformat="%B %d"
-        ),
+        xaxis=dict(title="Date", tickformat="%B %d"),
         yaxis={"title": "Acres burned", "hoverformat": ".3s"},
         height=650,
         margin={"l": 50, "r": 50, "b": 50, "t": 50, "pad": 4},
