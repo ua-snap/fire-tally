@@ -78,8 +78,7 @@ header = html.Div(
     ],
 )
 
-# Hidden for now, will probably need this later in dev tho.
-# that doesn't work.
+# Control which allows user to specify a date range.
 # Mark the steps by day of year.
 date_ranges = [91, 121, 152, 182, 213, 243, 275]
 date_names = list(
@@ -104,8 +103,10 @@ range_slider_field = html.Div(
     ],
 )
 
+# Control which lets user choose a protection area/management zone
 zone_dropdown = dcc.Dropdown(
     id="area",
+    className="dropdown-selector",
     options=[{"label": luts.zones[key], "value": key} for key in luts.zones],
     value="ALL",
 )
@@ -114,6 +115,22 @@ zone_dropdown_field = html.Div(
     children=[
         html.Label("Protection Area", className="label"),
         html.Div(className="control", children=[zone_dropdown]),
+    ],
+)
+
+# Control which lets user choose a year (2004-present).
+# For now we only have data for 2004-2005, so only allow those choices.
+year_dropdown = dcc.Dropdown(
+    id="year",
+    className="dropdown-selector",
+    options=[{"label": year, "value": year} for year in range(2004, 2006)],
+    value=2004,
+)
+year_dropdown_field = html.Div(
+    className="field",
+    children=[
+        html.Label("Year", className="label"),
+        html.Div(className="control", children=[year_dropdown]),
     ],
 )
 
@@ -148,6 +165,17 @@ tally_zone_graph = wrap_in_section(
         zone_dropdown_field,
         html.Div(
             className="graph", children=[dcc.Graph(id="tally-zone", config=fig_configs)]
+        ),
+    ]
+)
+
+# Daily Tally by Year/Protection Zone
+# TODO add header info text, appropriate CSS
+year_zone_graph = wrap_in_section(
+    [
+        year_dropdown_field,
+        html.Div(
+            className="graph", children=[dcc.Graph(id="tally-year", config=fig_configs)]
         ),
     ]
 )
@@ -214,7 +242,7 @@ layout = html.Div(
         header,
         html.Div(
             className="container",
-            children=[about, tally_graph, tally_zone_graph, after_chart],
+            children=[about, tally_graph, tally_zone_graph, year_zone_graph, after_chart],
         ),
         footer,
     ]
