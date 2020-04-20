@@ -21,7 +21,7 @@ app = dash.Dash(__name__)
 application = app.server
 
 # Customize this layout to include Google Analytics
-gtag_id = os.environ["GTAG_ID"]
+gtag_id = os.getenv("GTAG_ID", default="")
 app.index_string = f"""
 <!DOCTYPE html>
 <html>
@@ -302,4 +302,4 @@ def update_year_zone(year, day_range):
 
 
 if __name__ == "__main__":
-    application.run(debug=os.environ["FLASK_DEBUG"], port=8080)
+    application.run(debug=os.getenv("FLASK_DEBUG", default=False), port=8080)
