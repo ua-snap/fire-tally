@@ -8,6 +8,7 @@ from datetime import datetime
 import dash_core_components as dcc
 import dash_html_components as html
 import luts
+import data
 
 # For hosting
 path_prefix = os.getenv("REQUESTS_PATHNAME_PREFIX") or "/"
@@ -143,7 +144,7 @@ zone_dropdown_field = html.Div(
 year_dropdown = dcc.Dropdown(
     id="year",
     className="dropdown-selector",
-    options=[{"label": year, "value": year} for year in range(2004, 2006)],
+    options=[{"label": year, "value": year} for year in data.tally_zone_date_ranges],
     value=2004,
 )
 year_dropdown_field = html.Div(
