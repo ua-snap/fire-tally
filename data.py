@@ -7,13 +7,18 @@ Perform data pre-processing for the web app.
 
 import os
 import ssl
+import traceback
+import logging
 from datetime import datetime
 import numpy as np
 import pandas as pd
 
+logging.basicConfig(level=logging.INFO)
+
 # Bypass SSL certification check for the AICC server
 # Remove if/when they address that configuration
-# TODO -- verify if this is still needed after AICC update
+# TODO -- verify if this is still needed after AICC update,
+# unfortunately still true as of 4/20
 try:
     _create_unverified_https_context = ssl._create_unverified_context
 except AttributeError:
@@ -23,17 +28,23 @@ else:
     # Handle target environment that doesn't support HTTPS verification
     ssl._create_default_https_context = _create_unverified_https_context
 
-if "FLASK_DEBUG" in os.environ and os.environ["FLASK_DEBUG"] == "True":
-    # TODO add logging
-    print("Using debug mode.")  # keep until logging implemented
+
+if os.getenv("FLASK_DEBUG") == "True":
+    logging.info("Using debug mode.")
     TALLY_DATA_URL = "./data/test.csv"  # for local development
     TALLY_DATA_ZONES_URL = "./data/test-areas.csv"  # for local development
 else:
     # in production, load from live URL
     # Probably this: https://fire.ak.blm.gov/content/aicc/Statistics%20Directory/Alaska%20Daily%20Stats%20-%202004%20to%20Present.csv
-    TALLY_DATA_URL = os.environ["TALLY_DATA_URL"]
+    TALLY_DATA_URL = os.getenv(
+        "TALLY_DATA_URL",
+        default="https://fire.ak.blm.gov/content/aicc/Statistics%20Directory/Alaska%20Daily%20Stats%20-%202004%20to%20Present.csv",
+    )
     # Probably this: https://fire.ak.blm.gov/content/aicc/Statistics%20Directory/Alaska%20Daily%20Stats%20by%20Protection-2004%20to%20Present.csv
-    TALLY_DATA_ZONES_URL = os.environ["TALLY_DATA_ZONES_URL"]
+    TALLY_DATA_ZONES_URL = os.getenv(
+        "TALLY_DATA_ZONES_URL",
+        default="https://fire.ak.blm.gov/content/aicc/Statistics%20Directory/Alaska%20Daily%20Stats%20by%20Protection-2004%20to%20Present.csv",
+    )
 
 
 def collapse_year(date):
@@ -46,9 +57,9 @@ def collapse_year(date):
     try:
         d = datetime.strptime(str(date), "%Y%m%d")
         d = d.replace(year=2020)
-    except:
+    except ValueError:
         # Invalid date, return a null to be dropped
-        print("Invalid date found", date)
+        logging.error("Invalid date found, %s", date)
         d = np.NaN
 
     return d
@@ -77,42 +88,50 @@ def preprocess_data(csv):
 
 
 # Ready & preprocess data
-# TODO make this more resiliant when network exceptions occur
-# TODO add logging
 # TODO ensure this runs on a schedule in a long-running flask loop
-tally_raw = pd.read_csv(TALLY_DATA_URL, parse_dates=True)
-tally_raw = tally_raw.drop(
-    columns=[
-        "ID",
-        "Month",
-        "Day",
-        "TotalFires",
-        "HumanFires",
-        "HumanAcres",
-        "LightningFires",
-        "LightningAcres",
-        "PrepLevel",
-        "Active Fires",
-        "Staffed Fires",
-    ]
-)
-tally = preprocess_data(tally_raw)
+logging.info("Updating data...")
 
-tally_zone_raw = pd.read_csv(TALLY_DATA_ZONES_URL, parse_dates=True)
-tally_zone_raw = tally_zone_raw.drop(
-    columns=[
-        "ID",
-        "Month",
-        "Day",
-        "NewFires",
-        "OutFires",
-        "ActiveFires",
-        "TotalFires",
-        "PrepLevel",
-        "StaffedFires",
-    ]
-)
-tally_zone = preprocess_data(tally_zone_raw)
+try:
+    tally_raw = pd.read_csv(TALLY_DATA_URL, parse_dates=True)
+    tally_raw = tally_raw.drop(
+        columns=[
+            "ID",
+            "Month",
+            "Day",
+            "TotalFires",
+            "HumanFires",
+            "HumanAcres",
+            "LightningFires",
+            "LightningAcres",
+            "PrepLevel",
+            "Active Fires",
+            "Staffed Fires",
+        ]
+    )
+    tally = preprocess_data(tally_raw)
 
-# Compute what years are available in the tally zone file.
-tally_zone_date_ranges = tally_zone.FireSeason.unique()
+    tally_zone_raw = pd.read_csv(TALLY_DATA_ZONES_URL, parse_dates=True)
+    tally_zone_raw = tally_zone_raw.drop(
+        columns=[
+            "ID",
+            "Month",
+            "Day",
+            "NewFires",
+            "OutFires",
+            "ActiveFires",
+            "TotalFires",
+            "PrepLevel",
+            "StaffedFires",
+        ]
+    )
+    tally_zone = preprocess_data(tally_zone_raw)
+
+    # Compute what years are available in the tally zone file.
+    tally_zone_date_ranges = tally_zone.FireSeason.unique()
+    logging.info("...data updated successfully.")
+
+except Exception as e:
+    # There could be a number of different network-
+    # or data-based errors, just ensure they're written
+    # to stdout logging.
+    logging.error(traceback.format_exc())
