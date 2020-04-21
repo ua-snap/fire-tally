@@ -9,49 +9,42 @@ h1, h2, h3, h4, h5, h6 {
 	font-family: 'Open Sans';
 }
 
-/* We want vertical Checklists always. */
-.control label.checkbox {
-	display: block;
-}
-
 .header {
-	background-color: #EFF1E2;
-	padding: 0 0 2rem;
+	border-bottom: 1px solid #aaa;
 }
-
-.header--section {
-	margin-top: -1rem;
-}
-
-.header--section h1 {
-	padding-top: 2rem;
-}
-
-.header--logo {
+.header a {
+	height: 5.4rem;
 	float: left;
-	padding-right: 2rem;
-}
-
-a.header--snap-link {
-	height: 5.4em;
-	display: block;
 	z-index: 1000;
+	position: relative;
+	bottom: 1.4rem;
+	margin-right: 3rem;
+}
+.header a img {
+	height: 5.4rem;
 }
 
-.header--snap-link img {
-	height: 5.4em;
+.camera-icon span {
+	display: inline-block;
+	position: relative;
+	top: 0.25rem;
+	padding: 0 3px;
 }
-.about {
-	margin-bottom: -3rem !important;
-}
-
-.about-after {
-	margin-top: -4rem !important;
-	padding-top: 0;
+.camera-icon span path {
+	fill: #ccc;
 }
 
 .dropdown-selector {
 	max-width: 15rem;
+}
+
+.section.graph {
+	border-bottom: 1px solid #eee;
+}
+
+/* Fix heights of charts */
+#tally, #tally-zone, #tally-year {
+	height: 600px;
 }
 
 .footer a {
