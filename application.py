@@ -106,6 +106,11 @@ def get_line_mode(day_range):
     return "line"
 
 
+# Some reused configs in charts go here to reduce duplication.
+yaxis_conf = dict(title="Area burned (acres)")
+xaxis_conf = dict(tickformat="%B %-d")
+
+
 @app.callback(Output("tally", "figure"), [Input("day_range", "value")])
 def update_tally(day_range):
     """ Generate daily tally count """
@@ -162,16 +167,8 @@ def update_tally(day_range):
     graph_layout = go.Layout(
         title="<b>Alaska Statewide Daily Tally Records, 2004-Present,</b><br>"
         + get_title_date_span(day_range),
-        showlegend=True,
-        legend={"font": {"family": "Open Sans", "size": 10}},
-        xaxis=dict(title="Date", tickformat="%B %-d"),
-        # TODO hoverformat is giving weird numbers in some cases,
-        # like "300m", what's up with that.
-        # TODO yaxis needs to be smarter now that the date
-        # ranges can be dynamic.
-        yaxis={"title": "Acres burned (millions)", "hoverformat": ".3s"},
-        height=650,
-        margin={"l": 50, "r": 50, "b": 50, "t": 50, "pad": 4},
+        xaxis=xaxis_conf,
+        yaxis=yaxis_conf,
     )
     return {"data": data_traces, "layout": graph_layout}
 
@@ -242,15 +239,12 @@ def update_tally_zone(area, day_range):
     )
 
     graph_layout = go.Layout(
-        title="<b>Daily Tally Records, "
+        title="<b>Alaska Daily Tally Records, "
         + luts.zones[area]
         + ", 2004-Present</b><br>"
         + get_title_date_span(day_range),
-        showlegend=True,
-        legend={"font": {"family": "Open Sans", "size": 10}},
-        xaxis=dict(title="Date", tickformat="%B %-d"),
-        yaxis={"title": "Acres burned", "hoverformat": ".3s"},
-        margin={"l": 50, "r": 50, "b": 50, "t": 50, "pad": 4},
+        xaxis=xaxis_conf,
+        yaxis=yaxis_conf,
     )
     return {"data": data_traces, "layout": graph_layout}
 
@@ -287,16 +281,12 @@ def update_year_zone(year, day_range):
         )
 
     graph_layout = go.Layout(
-        title="<b>Daily Tally Records by Protection Area, "
+        title="<b>Alaska Daily Tally Records by Year, "
         + str(year)
         + "</b><br>"
         + get_title_date_span(day_range),
-        showlegend=True,
-        legend={"font": {"family": "Open Sans", "size": 10}},
-        xaxis=dict(title="Date", tickformat="%B %-d"),
-        yaxis={"title": "Acres burned", "hoverformat": ".3s"},
-        height=650,
-        margin={"l": 50, "r": 50, "b": 50, "t": 50, "pad": 4},
+        xaxis=xaxis_conf,
+        yaxis=yaxis_conf,
     )
     return {"data": data_traces, "layout": graph_layout}
 
