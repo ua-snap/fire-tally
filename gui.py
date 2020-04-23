@@ -105,23 +105,45 @@ def get_day_range_slider(element_id):
     )
 
 
-header = wrap_in_section(
-    [
-        html.A(
-            href="https://www.snap.uaf.edu",
-            children=[
-                html.Img(src=path_prefix + "assets/SNAP_acronym_color_square.svg")
-            ],
-        ),
-        html.H1(luts.title, className="title is-3"),
-    ],
-    section_classes="header",
+header = ddsih.DangerouslySetInnerHTML(
+    f"""
+<div class="container">
+<nav class="navbar" role="navigation" aria-label="main navigation">
+
+  <div class="navbar-brand">
+    <a class="navbar-item" href="https://www.snap.uaf.edu">
+      <img src="{path_prefix}assets/SNAP_acronym_color_square.svg">
+    </a>
+
+    <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+
+  <div class="navbar-menu">
+
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <div class="buttons">
+          <a class="button is-primary">
+            <strong>Feedback</strong>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+</div>
+"""
 )
 
 about = wrap_in_section(
     [
         ddsih.DangerouslySetInnerHTML(
-            """
+            f"""
+<h1 class="title is-3">{luts.title}</h1>
 <p> These charts compare the current year's daily tally of acres burned to high fire years (> 1 million acres burned) since daily tally records began in 2004.</p>
 <p class="camera-icon">Click the <span>
 <svg viewBox="0 0 1000 1000" class="icon" height="1em" width="1em"><path d="m500 450c-83 0-150-67-150-150 0-83 67-150 150-150 83 0 150 67 150 150 0 83-67 150-150 150z m400 150h-120c-16 0-34 13-39 29l-31 93c-6 15-23 28-40 28h-340c-16 0-34-13-39-28l-31-94c-6-15-23-28-40-28h-120c-55 0-100-45-100-100v-450c0-55 45-100 100-100h800c55 0 100 45 100 100v450c0 55-45 100-100 100z m-400-550c-138 0-250 112-250 250 0 138 112 250 250 250 138 0 250-112 250-250 0-138-112-250-250-250z m365 380c-19 0-35 16-35 35 0 19 16 35 35 35 19 0 35-16 35-35 0-19-16-35-35-35z" transform="matrix(1 0 0 -1 0 850)"></path></svg>
@@ -250,14 +272,7 @@ UA is an AA/EO employer and educational institution and prohibits illegal discri
 layout = html.Div(
     children=[
         header,
-        html.Div(
-            children=[
-                about,
-                tally_graph,
-                tally_zone_graph,
-                year_zone_graph,
-            ]
-        ),
+        html.Div(children=[about, tally_graph, tally_zone_graph, year_zone_graph]),
         footer,
     ]
 )
