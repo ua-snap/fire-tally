@@ -20,7 +20,13 @@ pipenv run flask run
 
 The project is run through Flask and will be available at [http://localhost:5000](http://localhost:5000).
 
-Example data is in the `data/` directory.
+Other env vars that can be set:
+
+ * `DASH_LOG_LEVEL` - sets level of logger, default INFO
+ * `DASH_CACHE_EXPIRE` - Has sane default (1 day), override if testing cache behavior.
+ * `TALLY_DATA_URL` - URL to source data CSV, has a sane working default baked in
+ * `TALLY_DATA_ZONES_URL` - URL to source data CSV, has a sane working default baked in
+
 
 ## Deploying to AWS Elastic Beanstalk:
 
@@ -36,7 +42,6 @@ eb deploy
 The following env vars must be set:
 
  * `REQUESTS_PATHNAME_PREFIX` - URL fragment so requests are properly routed.
- * `TALLY_DATA_URL` - URL to source data CSV
  * `GTAG_ID` - Google Tag Manager ID
 
 For local development, set `FLASK_DEBUG` to `True`.  This will use a local file for source data and enable other debugging tools.
