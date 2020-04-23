@@ -9,19 +9,21 @@ h1, h2, h3, h4, h5, h6 {
 	font-family: 'Open Sans';
 }
 
-.header {
-	border-bottom: 1px solid #aaa;
+.button.is-primary {
+	background-color: #96A73A;
 }
-.header a {
-	height: 5.4rem;
-	float: left;
-	z-index: 1000;
-	position: relative;
-	bottom: 1.4rem;
-	margin-right: 3rem;
+.button.is-primary:hover {
+	background-color: #526306;
 }
-.header a img {
-	height: 5.4rem;
+
+
+nav.navbar {
+	border-bottom: 1px solid #eee;
+}
+
+nav .navbar-brand img {
+	max-height: 3rem;
+	height: 3rem;
 }
 
 .camera-icon span {
@@ -39,12 +41,16 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .section.graph {
-	border-bottom: 1px solid #eee;
+    box-shadow: inset 0 7px 9px -7px rgba(0,0,0,0.1);
 }
 
 /* Fix heights of charts */
 #tally, #tally-zone, #tally-year {
 	height: 600px;
+}
+
+.footer {
+    box-shadow: inset 0 7px 9px -7px rgba(0,0,0,0.4);
 }
 
 .footer a {
