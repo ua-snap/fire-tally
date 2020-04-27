@@ -40,7 +40,7 @@ date_names = list(
 
 raw_data = pd.read_csv(TALLY_DATA_URL, index_col=0, parse_dates=True)
 
-app = dash.Dash(__name__)
+app = dash.Dash(__name__, requests_pathname_prefix=os.environ["REQUESTS_PATHNAME_PREFIX"])
 
 # AWS Elastic Beanstalk looks for application by default,
 # if this variable (application) isn't set you will get a WSGI error.
