@@ -12,7 +12,6 @@ import plotly.graph_objs as go
 import luts
 from gui import layout
 import pandas as pd
-import numpy as np
 
 import ssl
 
@@ -29,10 +28,10 @@ else:
     ssl._create_default_https_context = _create_unverified_https_context
 
 if "FLASK_DEBUG" in os.environ and os.environ["FLASK_DEBUG"] == "True":
-    TALLY_DATA_URL = "./data/test-areas.csv"  # for local development
+    TALLY_DATA_URL = "./data/test.csv"  # for local development
 else:
     # in production, load from live URL
-    # Probably here: https://fire.ak.blm.gov/content/aicc/Statistics%20Directory/Alaska%20Daily%20Stats%20by%20Protection-2004%20to%20Present.csv
+    # Probably here: https://fire.ak.blm.gov/content/aicc/Statistics%20Directory/Alaska%20Daily%20Stats%20-%202004%20to%20Present.csv
     TALLY_DATA_URL = os.environ["TALLY_DATA_URL"]
 
 # TODO I think this is unused, can remove during further review?
@@ -42,42 +41,31 @@ date_names = list(
 )
 
 # Perform basic data pre-processing
-raw_data = pd.read_csv(TALLY_DATA_URL, parse_dates=True)
+raw_data = pd.read_csv(TALLY_DATA_URL, index_col=0, parse_dates=True)
 
 df = raw_data
-df = df.drop(columns=["ID", "Month", "Day", "NewFires", "OutFires", "ActiveFires", "TotalFires", "PrepLevel", "StaffedFires"])
 df = df.loc[(df["FireSeason"] >= 2004)]
 
 # Generate a synthetic datetime field,
 # with all the same year.  This lets us
 # give Plotly the x-axis as a date.
 def collapse_year(date):
-    try:
-        d = datetime.strptime(str(date), "%Y%m%d")
-        d = d.replace(year=2020)
-    except:
-        # Invalid date, return a null to be dropped
-        print("Invalid date found", date)
-        d = np.NaN
+    stacked_date = "2000/{}/{}".format(date.month, date.day)
+    return datetime.strptime(stacked_date, "%Y/%m/%d")
 
-    return d
-
+df = df.assign(
+    datetime=pd.to_datetime(df["SitReportDate"], format="%Y%m%d", errors="coerce")
+)
 df = df.assign(
     date_stacked=pd.to_datetime(
-        df["SitReportDate"].apply(collapse_year)
+        df["datetime"].apply(collapse_year), format="%Y-%m-%d"
     )
 )
-df = df.dropna()
-df = df.drop(columns=["SitReportDate"])
-
-# Create day-of-year column for easy slicing
 df = df.assign(
-    doy=df["date_stacked"].dt.strftime("%j").astype("int")
+    doy=df["datetime"].dt.strftime("%j").astype("int")
 )
 
-# A few more fields/flags
 data_start_doy = 92  # April 1
-apply_loess = False  # This filter can fail unless it has enough data values.
 
 app = dash.Dash(__name__)
 
@@ -147,24 +135,18 @@ app.title = luts.title
 app.layout = layout
 
 
-@app.callback(Output("tally", "figure"), [Input("area", "value")])
-def update_tally(area):
+@app.callback(Output("tally", "figure"), [Input("day_range", "value")])
+def update_tally(day_range):
     """ Generate daily tally count """
 
-    # Slice for April 1 (Day 92) - today.  Show 45 days minimum.
-    # TODO -- lines below are commented out for intial work,
-    # but, we do need to be determining how this should work.
-    # today_doy = int(datetime.now().strftime("%j"))
-    # end_doy = today_doy if (today_doy - data_start_doy) >= 45 else data_start_doy + 45
+    today_doy = int(datetime.now().strftime("%j"))
 
-    # Spatial clip
-    if area == "ALL":
-        de = df.groupby(["FireSeason", "doy", "date_stacked"]).sum().reset_index()
-        print(de)
-    else:
-        de = df.loc[
-            (df["ProtectionUnit"] == area)
-        ]
+    # Slice for April 1 (Day 92) - today.  Show 45 days minimum.
+    end_doy = today_doy if (today_doy - data_start_doy) >= 45 else data_start_doy + 45
+    de = df  # copy for local slicing
+    de = de.loc[
+        (de["doy"] >= data_start_doy) & (de["doy"] <= end_doy)
+    ]
 
     data_traces = []
     grouped = de.groupby("FireSeason")
@@ -172,31 +154,24 @@ def update_tally(area):
         group = group.sort_values(["date_stacked"])
 
         # If there's enough data points, smooth with LOESS.
-        # We don't quite know the full criteria for this, so leave the
-        # code in place but bypass for the moment.
-        # TODO resolve how/when this is used.
+
         # Apply LOESS filter to smooth the data.
         # https://www.statsmodels.org/dev/generated/statsmodels.nonparametric.smoothers_lowess.lowess.html
-        acres = group.TotalAcres
-        if apply_loess:
-            group = group.assign(
-                SmoothedTotalAcres=sm.nonparametric.lowess(
-                    group.TotalAcres,
-                    group.date_stacked,
-                    return_sorted=False,
-                    frac=0.05,
-                    it=1,
-                    delta=3,
-                )
+        group = group.assign(
+            SmoothedTotalAcres=sm.nonparametric.lowess(
+                group.TotalAcres,
+                group.date_stacked,
+                return_sorted=False,
+                frac=0.05,
+                it=1,
+                delta=3,
             )
-            # Handle some odd values that showed up in raw data.
-            group["SmoothedTotalAcres"] = group["SmoothedTotalAcres"].apply(
-                lambda x: x if x >= 0 else 0
-            )
-            acres = group.SmoothedTotalAcres
+        )
+        # Handle some odd values that showed up in raw data.
+        group["SmoothedTotalAcres"] = group["SmoothedTotalAcres"].apply(
+            lambda x: x if x >= 0 else 0
+        )
 
-
-        # Only put high-fire years in the legend.
         if name in luts.important_years:
             hoverinfo = ""
             showlegend = True
@@ -208,16 +183,12 @@ def update_tally(area):
             [
                 {
                     "x": group.date_stacked,
-                    "y": acres,
+                    "y": group.SmoothedTotalAcres,
                     "mode": "lines",
                     "name": str(name),
                     "line": {
                         "color": luts.years_lines_styles[str(name)]["color"],
-                        # "shape": "spline",
-                        # ^ TODO determine if/when to restore this,
-                        # after figuring out the LOESS stuff.
-                        # It can either look much better or much
-                        # worse depending on the shape of the data.
+                        "shape": "spline",
                         "width": luts.years_lines_styles[str(name)]["width"],
                     },
                     "showlegend": showlegend,

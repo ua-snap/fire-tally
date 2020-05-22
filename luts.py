@@ -30,21 +30,3 @@ years_lines_styles = {
     "2019": {"color": "rgba(10, 255, 128, .85)", "width": "2"},
     "2020": {"color": "rgba(10, 25, 0, .85)", "width": "4"},
 }
-
-zones = {
-    "ALL": "Statewide",
-    "MID": "Military Zone",
-    "DAS": "Delta Area",
-    "FAS": "Fairbanks Area",
-    "MSS": "Mat-Su Area",
-    "CRS": "Copper River Area",
-    "UYD": "Upper Yukon Zone",
-    "KKS": "Kenai/Kodiak Area",
-    "SWS": "Southwest Area",
-    "CGF": "Chugach National Forest",
-    "GAD": "Galena Zone",
-    "TAS": "Tok Area",
-    "HNS": "Haines Area",
-    "TAD": "Tanana Zone",
-    "TNF": "Tongass National Forest",
-}

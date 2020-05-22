@@ -46,10 +46,10 @@ header = html.Div(
     className="header",
     children=[
         html.Div(
-            className="section",
+            className="container",
             children=[
                 html.Div(
-                    className="container header--section",
+                    className="section header--section",
                     children=[
                         html.Div(
                             className="header--logo",
@@ -68,7 +68,12 @@ header = html.Div(
                         ),
                         html.Div(
                             className="header--titles",
-                            children=[html.H1(luts.title, className="title is-3")],
+                            children=[
+                                html.H1(
+                                    luts.title,
+                                    className="title is-3",
+                                )
+                            ],
                         ),
                     ],
                 )
@@ -78,29 +83,14 @@ header = html.Div(
 )
 
 # Hidden for now, will probably need this later in dev tho.
-# TODO -- consider this instead of the built-in version
-# that doesn't work.
-# range_slider = dcc.RangeSlider(
-#     id="day_range", count=1, min=1, max=365, step=0.5, value=[1, 365]
-# )
-# range_slider_field = html.Div(
-#     className="field hidden",
-#     children=[
-#         html.Label("Range Slider", className="label"),
-#         html.Div(className="control", children=[range_slider]),
-#     ],
-# )
-
-zone_dropdown = dcc.Dropdown(
-    id="area",
-    options=[{"label": luts.zones[key], "value": key} for key in luts.zones],
-    value="ALL",
+range_slider = dcc.RangeSlider(
+    id="day_range", count=1, min=1, max=365, step=0.5, value=[1, 365]
 )
-zone_dropdown_field = html.Div(
-    className="field",
+range_slider_field = html.Div(
+    className="field hidden",
     children=[
-        html.Label("Protection Area", className="label"),
-        html.Div(className="control", children=[zone_dropdown]),
+        html.Label("Range Slider", className="label"),
+        html.Div(className="control", children=[range_slider]),
     ],
 )
 
@@ -108,15 +98,9 @@ main_section = html.Div(
     className="section",
     children=[
         html.Div(
-            className="container",
-            children=[
-                zone_dropdown_field,
-                html.Div(
-                    className="graph",
-                    children=[dcc.Graph(id="tally", config=fig_configs)],
-                )
-            ],
-        )
+            className="graph", children=[dcc.Graph(id="tally", config=fig_configs)]
+        ),
+        range_slider_field,
     ],
 )
 
@@ -168,6 +152,7 @@ after_chart = html.Div(
         dcc.Markdown(
             """
 
+ * Use sliders above to explore all date ranges.
  * Daily tallies go up or down as improved estimates and data become available throughout the fire season.
  * Data provided by the [Alaska Interagency Coordination Center (AICC)](https://fire.ak.blm.gov).
 
@@ -179,10 +164,7 @@ after_chart = html.Div(
 layout = html.Div(
     children=[
         header,
-        html.Div(
-            className="container",
-            children=[about, main_section, after_chart],
-        ),
+        html.Div(className="container", children=[about, main_section, after_chart]),
         footer,
     ]
 )
