@@ -272,8 +272,6 @@ def update_tally(day_range):
         xaxis=dict(title="Date", tickformat="%B %-d"),
         # TODO hoverformat is giving weird numbers in some cases,
         # like "300m", what's up with that.
-        # TODO yaxis needs to be smarter now that the date
-        # ranges can be dynamic.
         yaxis={"title": "Acres burned (millions)", "hoverformat": ".3s"},
         height=650,
         margin={"l": 50, "r": 50, "b": 50, "t": 50, "pad": 4},
@@ -376,76 +374,7 @@ def update_tally_zone(area):
         title="Daily Tally Records, 2004-Present",
         showlegend=True,
         legend={"font": {"family": "Open Sans", "size": 10}},
-        xaxis=dict(title="Date", tickformat="%B %-d"),
-        yaxis={"title": "Acres burned", "hoverformat": ".3s"},
-        height=650,
-        margin={"l": 50, "r": 50, "b": 50, "t": 50, "pad": 4},
-    )
-    return {"data": data_traces, "layout": graph_layout}
-
-
-@app.callback(Output("tally-year", "figure"), [Input("year", "value")])
-def update_year_zone(year):
-    """ Generate daily tally count by area/year """
-
-    # TODO -- add date range selector.
-
-    de = tally_zone.loc[(tally_zone.FireSeason == year)]
-
-    data_traces = []
-    grouped = de.groupby("ProtectionUnit")
-    for name, group in grouped:
-        group = group.sort_values(["date_stacked"])
-
-        # If there's enough data points, smooth with LOESS.
-        # We don't quite know the full criteria for this, so leave the
-        # code in place but bypass for the moment.
-        # TODO resolve how/when this is used.
-        # Apply LOESS filter to smooth the data.
-        # https://www.statsmodels.org/dev/generated/statsmodels.nonparametric.smoothers_lowess.lowess.html
-        acres = group.TotalAcres
-        if apply_loess:
-            group = group.assign(
-                SmoothedTotalAcres=sm.nonparametric.lowess(
-                    group.TotalAcres,
-                    group.date_stacked,
-                    return_sorted=False,
-                    frac=0.05,
-                    it=1,
-                    delta=3,
-                )
-            )
-            # Handle some odd values that showed up in raw data.
-            group["SmoothedTotalAcres"] = group["SmoothedTotalAcres"].apply(
-                lambda x: x if x >= 0 else 0
-            )
-            acres = group.SmoothedTotalAcres
-
-        data_traces.extend(
-            [
-                {
-                    "x": group.date_stacked,
-                    "y": acres,
-                    "mode": "lines",
-                    "name": luts.zones[name],
-                    "line": {
-                        # "color": luts.years_lines_styles[str(name)]["color"],
-                        # "shape": "spline",
-                        # ^ TODO determine if/when to restore this,
-                        # after figuring out the LOESS stuff.
-                        # It can either look much better or much
-                        # worse depending on the shape of the data.
-                        "width": 2,
-                    }
-                }
-            ]
-        )
-
-    graph_layout = go.Layout(
-        title="Daily Tally Records, 2004-Present",
-        showlegend=True,
-        legend={"font": {"family": "Open Sans", "size": 10}},
-        xaxis=dict(title="Date", tickformat="%B %-d"),
+        xaxis=dict(title="Date", tickformat="%B %d"),
         yaxis={"title": "Acres burned", "hoverformat": ".3s"},
         height=650,
         margin={"l": 50, "r": 50, "b": 50, "t": 50, "pad": 4},
