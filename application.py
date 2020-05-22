@@ -8,8 +8,11 @@ import dash
 from dash.dependencies import Input, Output
 import plotly.graph_objs as go
 import luts
-import data
 from gui import layout
+
+# Load data.
+from data import tally
+from data import tally_zone
 
 app = dash.Dash(__name__)
 
@@ -112,8 +115,6 @@ hover_conf = "%{y:,} acres"  # hover format (D3 language)
 @app.callback(Output("tally", "figure"), [Input("day_range", "value")])
 def update_tally(day_range):
     """ Generate daily tally count """
-
-    (tally, tally_zone, tally_zone_date_ranges) = data.fetch_data()
     data_traces = []
 
     #  Slice by day range.
@@ -182,7 +183,6 @@ def update_tally(day_range):
 )
 def update_tally_zone(area, day_range):
     """ Generate daily tally count for specified protection area """
-    (tally, tally_zone, tally_zone_date_ranges) = data.fetch_data()
 
     #  Slice by day range.
     sliced = tally_zone.loc[
@@ -250,7 +250,6 @@ def update_tally_zone(area, day_range):
 )
 def update_year_zone(year, day_range):
     """ Generate daily tally count by area/year """
-    (tally, tally_zone, tally_zone_date_ranges) = data.fetch_data()
 
     # Clip to day range
     sliced = tally_zone.loc[

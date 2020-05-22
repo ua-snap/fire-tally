@@ -12,7 +12,6 @@ plotly = "*"
 dash_dangerously_set_inner_html = "*"
 pandas = "*"
 statsmodels = "*"
-beaker = "*"
 
 [dev-packages]
 flask = "*"

@@ -11,8 +11,6 @@ import dash_dangerously_set_inner_html as ddsih
 import luts
 import data
 
-(tally, tally_zone, tally_zone_date_ranges) = data.fetch_data()
-
 # For hosting
 path_prefix = os.getenv("REQUESTS_PATHNAME_PREFIX") or "/"
 
@@ -212,7 +210,7 @@ range_slider_field_year = get_day_range_slider("day_range_year")
 year_dropdown = dcc.Dropdown(
     id="year",
     className="dropdown-selector",
-    options=[{"label": year, "value": year} for year in tally_zone_date_ranges],
+    options=[{"label": year, "value": year} for year in data.tally_zone_date_ranges],
     value=2004,
 )
 year_dropdown_field = html.Div(
