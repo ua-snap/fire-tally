@@ -112,7 +112,7 @@ header = ddsih.DangerouslySetInnerHTML(
 
   <div class="navbar-brand">
     <a class="navbar-item" href="https://www.snap.uaf.edu">
-      <img src="{path_prefix}assets/SNAP_mapventures_header.svg">
+      <img src="{path_prefix}assets/SNAP_acronym_color_square.svg">
     </a>
 
     <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
@@ -123,10 +123,11 @@ header = ddsih.DangerouslySetInnerHTML(
   </div>
 
   <div class="navbar-menu">
+
     <div class="navbar-end">
       <div class="navbar-item">
         <div class="buttons">
-          <a target="_blank" rel="noopener noreferrer" href="https://uaf-iarc.typeform.com/to/UCZcRB" class="button is-primary">
+          <a class="button is-primary">
             <strong>Feedback</strong>
           </a>
         </div>
@@ -147,7 +148,7 @@ about = wrap_in_section(
 <p class="camera-icon">Click the <span>
 <svg viewBox="0 0 1000 1000" class="icon" height="1em" width="1em"><path d="m500 450c-83 0-150-67-150-150 0-83 67-150 150-150 83 0 150 67 150 150 0 83-67 150-150 150z m400 150h-120c-16 0-34 13-39 29l-31 93c-6 15-23 28-40 28h-340c-16 0-34-13-39-28l-31-94c-6-15-23-28-40-28h-120c-55 0-100-45-100-100v-450c0-55 45-100 100-100h800c55 0 100 45 100 100v450c0 55-45 100-100 100z m-400-550c-138 0-250 112-250 250 0 138 112 250 250 250 138 0 250-112 250-250 0-138-112-250-250-250z m365 380c-19 0-35 16-35 35 0 19 16 35 35 35 19 0 35-16 35-35 0-19-16-35-35-35z" transform="matrix(1 0 0 -1 0 850)"></path></svg>
 </span> icon in the upper&ndash;right of each chart to download it.  Below each chart is a slider that can be used to select the date range shown in the chart.</p>
-<p>This tool was developed by the <a href="https://www.snap.uaf.edu">Scenarios Network for Alaska and Arctic Planning (SNAP)</a>.  Data are provided by the <a href="https://fire.ak.blm.gov">Alaska Interagency Coordination Center (AICC)</a>.
+<p>Data provided by the <a href="https://fire.ak.blm.gov">Alaska Interagency Coordination Center (AICC)</a>.
             """
         )
     ],
@@ -183,17 +184,18 @@ zone_dropdown = dcc.Dropdown(
 zone_dropdown_field = html.Div(
     className="field",
     children=[
-        html.Label("Choose a protection area", className="label"),
+        html.Label("Protection Area", className="label"),
         html.Div(className="control", children=[zone_dropdown]),
     ],
 )
 tally_zone_graph = wrap_in_section(
     [
         html.H3("Daily tally by protection area", className="title is-4"),
-        ddsih.DangerouslySetInnerHTML(
+        html.P(
             """
-<p class="content is-size-5">This chart shows the daily tally for one protection area (<a href="https://fire.ak.blm.gov/content/maps/aicc/Large%20Maps/Alaska_Fire_Management_Zones.pdf">see this map of wildland fire protection areas</a> to see which areas cover which parts of the state).  These data are still being updated and not all years may be present yet.</p><br>
-        """
+Use the selector to choose a protection area.
+        """,
+            className="content is-size-5",
         ),
         zone_dropdown_field,
         html.Div(
@@ -216,7 +218,7 @@ year_dropdown = dcc.Dropdown(
 year_dropdown_field = html.Div(
     className="field",
     children=[
-        html.Label("Select a year", className="label"),
+        html.Label("Year", className="label"),
         html.Div(className="control", children=[year_dropdown]),
     ],
 )
@@ -225,7 +227,7 @@ year_zone_graph = wrap_in_section(
         html.H3("Daily tally by year", className="title is-4"),
         html.P(
             """
-This chart shows the daily tally for each protection area for a given year.  These data are still being updated and not all years may be present yet.
+This chart shows the daily tally for each protection area for a given year.  Use the selector to choose a year.  These data are still being updated and not all years may be present yet.
         """,
             className="content is-size-5",
         ),
@@ -234,8 +236,7 @@ This chart shows the daily tally for each protection area for a given year.  The
             className="graph", children=[dcc.Graph(id="tally-year", config=fig_configs)]
         ),
         range_slider_field_year,
-    ],
-    section_classes="graph",
+    ]
 )
 
 
@@ -259,11 +260,11 @@ footer = html.Footer(
                 ),
             ]
         ),
-        ddsih.DangerouslySetInnerHTML(
+        dcc.Markdown(
             """
-<p>UA is an AA/EO employer and educational institution and prohibits illegal discrimination against any individual.
-<br><a href="https://www.alaska.edu/nondiscrimination/">Statement of Nondiscrimination</a></p>
-            """
+UA is an AA/EO employer and educational institution and prohibits illegal discrimination against any individual. [Statement of Nondiscrimination](https://www.alaska.edu/nondiscrimination/)
+            """,
+            className="content is-size-6",
         ),
     ],
 )

@@ -109,7 +109,6 @@ def get_line_mode(day_range):
 # Some reused configs in charts go here to reduce duplication.
 yaxis_conf = dict(title="Area burned (acres)")
 xaxis_conf = dict(tickformat="%B %-d")
-hover_conf = "%{y:,} acres"  # hover format (D3 language)
 
 
 @app.callback(Output("tally", "figure"), [Input("day_range", "value")])
@@ -125,11 +124,9 @@ def update_tally(day_range):
         group = group.sort_values(["date_stacked"])
 
         if name in luts.important_years:
-            hovertemplate = hover_conf
             hoverinfo = ""
             showlegend = True
         else:
-            hovertemplate = None
             hoverinfo = "skip"
             showlegend = False
 
@@ -147,7 +144,6 @@ def update_tally(day_range):
                     },
                     "showlegend": showlegend,
                     "hoverinfo": hoverinfo,
-                    "hovertemplate": hovertemplate,
                 }
             ]
         )
@@ -271,7 +267,6 @@ def update_year_zone(year, day_range):
                     "mode": "lines",
                     "name": luts.zones[name],
                     "line": {"shape": get_line_mode(day_range), "width": 2},
-                    "hovertemplate": hover_conf,
                 }
             ]
         )

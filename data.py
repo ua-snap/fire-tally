@@ -84,8 +84,6 @@ def preprocess_data(csv):
 
     # Create day-of-year column for easy slicing
     df = df.assign(doy=df["date_stacked"].dt.strftime("%j").astype("int"))
-
-    df["TotalAcres"] = df["TotalAcres"].round(2)
     return df
 
 
