@@ -240,6 +240,8 @@ This chart shows the daily tally for each protection area for a given year.  The
     section_classes="graph",
 )
 
+# Used in copyright date
+current_year = datetime.now().year
 
 footer = html.Footer(
     className="footer has-text-centered",
@@ -262,9 +264,10 @@ footer = html.Footer(
             ]
         ),
         ddsih.DangerouslySetInnerHTML(
-            """
+            f"""
 <p>UA is an AA/EO employer and educational institution and prohibits illegal discrimination against any individual.
 <br><a href="https://www.alaska.edu/nondiscrimination/">Statement of Nondiscrimination</a></p>
+<p class="copyright">Copyright &copy; {current_year} University of Alaska Fairbanks.  All rights reserved.</p>
             """
         ),
     ],
