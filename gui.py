@@ -7,7 +7,6 @@ import os
 from datetime import datetime
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_dangerously_set_inner_html as ddsih
 import luts
 import data
 
@@ -15,9 +14,7 @@ import data
 path_prefix = os.getenv("REQUESTS_PATHNAME_PREFIX") or "/"
 
 # Used to make the chart exports nice
-fig_download_configs = dict(
-    filename="Daily_Tally_Count", width="1000", height="650", scale=2
-)
+fig_download_configs = dict(filename="Daily_Tally_Count", width="1000", scale=2)
 fig_configs = dict(
     displayModeBar=True,
     showSendToCloud=False,
@@ -43,26 +40,44 @@ fig_configs = dict(
     displaylogo=False,
 )
 
-
-# Helper functions
-def wrap_in_section(content, section_classes="", container_classes="", div_classes=""):
-    """
-    Helper function to wrap sections.
-    Accepts an array of children which will be assigned within
-    this structure:
-    <section class="section">
-        <div class="container">
-            <div>[children]...
-    """
-    return html.Section(
-        className="section " + section_classes,
-        children=[
-            html.Div(
-                className="container " + container_classes,
-                children=[html.Div(className=div_classes, children=content)],
-            )
-        ],
-    )
+# We want this HTML structure to get the full-width background color:
+# <div class="header">
+#   <div class="container"> gives us the centered column
+#     <div class="section"> a bit more padding to stay consistent with form
+header = html.Div(
+    className="header",
+    children=[
+        html.Div(
+            className="section",
+            children=[
+                html.Div(
+                    className="container header--section",
+                    children=[
+                        html.Div(
+                            className="header--logo",
+                            children=[
+                                html.A(
+                                    className="header--snap-link",
+                                    href="#",
+                                    children=[
+                                        html.Img(
+                                            src=path_prefix
+                                            + "assets/SNAP_acronym_color_square.svg"
+                                        )
+                                    ],
+                                )
+                            ],
+                        ),
+                        html.Div(
+                            className="header--titles",
+                            children=[html.H1(luts.title, className="title is-3")],
+                        ),
+                    ],
+                )
+            ],
+        )
+    ],
+)
 
 
 def get_day_range_slider(element_id):
@@ -105,54 +120,11 @@ def get_day_range_slider(element_id):
     )
 
 
-header = wrap_in_section(
-    [
-        html.A(
-            href="https://www.snap.uaf.edu",
-            children=[
-                html.Img(src=path_prefix + "assets/SNAP_acronym_color_square.svg")
-            ],
-        ),
-        html.H1(luts.title, className="title is-3"),
-    ],
-    section_classes="header",
-)
-
-about = wrap_in_section(
-    [
-        ddsih.DangerouslySetInnerHTML(
-            """
-<p> These charts compare the current year's daily tally of acres burned to high fire years (> 1 million acres burned) since daily tally records began in 2004.</p>
-<p class="camera-icon">Click the <span>
-<svg viewBox="0 0 1000 1000" class="icon" height="1em" width="1em"><path d="m500 450c-83 0-150-67-150-150 0-83 67-150 150-150 83 0 150 67 150 150 0 83-67 150-150 150z m400 150h-120c-16 0-34 13-39 29l-31 93c-6 15-23 28-40 28h-340c-16 0-34-13-39-28l-31-94c-6-15-23-28-40-28h-120c-55 0-100-45-100-100v-450c0-55 45-100 100-100h800c55 0 100 45 100 100v450c0 55-45 100-100 100z m-400-550c-138 0-250 112-250 250 0 138 112 250 250 250 138 0 250-112 250-250 0-138-112-250-250-250z m365 380c-19 0-35 16-35 35 0 19 16 35 35 35 19 0 35-16 35-35 0-19-16-35-35-35z" transform="matrix(1 0 0 -1 0 850)"></path></svg>
-</span> icon in the upper&ndash;right of each chart to download it.  Below each chart is a slider that can be used to select the date range shown in the chart.</p>
-<p>Data provided by the <a href="https://fire.ak.blm.gov">Alaska Interagency Coordination Center (AICC)</a>.
-            """
-        )
-    ],
-    div_classes="content is-size-5",
-)
-
-
-# Daily Tally, statewide only
 range_slider_field = get_day_range_slider("day_range")
-tally_graph = wrap_in_section(
-    [
-        html.H3("Statewide daily tally", className="title is-4"),
-        html.P(
-            """
-Daily tallies go up or down as improved estimates and data become available throughout the fire season.
-    """,
-            className="content is-size-5",
-        ),
-        dcc.Graph(id="tally", config=fig_configs),
-        range_slider_field,
-    ],
-    section_classes="graph",
-)
-
-# Daily Tally by Protection Zone
 range_slider_field_zone = get_day_range_slider("day_range_zone")
+range_slider_field_year = get_day_range_slider("day_range_year")
+
+# Control which lets user choose a protection area/management zone
 zone_dropdown = dcc.Dropdown(
     id="area",
     className="dropdown-selector",
@@ -166,27 +138,9 @@ zone_dropdown_field = html.Div(
         html.Div(className="control", children=[zone_dropdown]),
     ],
 )
-tally_zone_graph = wrap_in_section(
-    [
-        html.H3("Daily tally by protection area", className="title is-4"),
-        html.P(
-            """
-Use the selector to choose a protection area.
-        """,
-            className="content is-size-5",
-        ),
-        zone_dropdown_field,
-        html.Div(
-            className="graph", children=[dcc.Graph(id="tally-zone", config=fig_configs)]
-        ),
-        range_slider_field_zone,
-    ],
-    section_classes="graph",
-)
 
-
-# Daily Tally by Year/Protection Zone
-range_slider_field_year = get_day_range_slider("day_range_year")
+# Control which lets user choose a year (2004-present).
+# For now we only have data for 2004-2005, so only allow those choices.
 year_dropdown = dcc.Dropdown(
     id="year",
     className="dropdown-selector",
@@ -200,15 +154,48 @@ year_dropdown_field = html.Div(
         html.Div(className="control", children=[year_dropdown]),
     ],
 )
+
+
+def wrap_in_section(content):
+    """
+    Helper function to wrap sections.
+    Accepts an array of children which will be assigned within
+    this structure:
+    <section class="section">
+        <div class="container">
+            <div>[children]...
+    """
+    return html.Section(
+        className="section",
+        children=[
+            html.Div(className="container", children=[html.Div(children=content)])
+        ],
+    )
+
+
+# Daily Tally, statewide only
+# TODO add header, info text, appropriate CSS
+# TODO ensure all graph sizes are specified with height/widths
+tally_graph = wrap_in_section(
+    [dcc.Graph(id="tally", config=fig_configs), range_slider_field]
+)
+
+# Daily Tally by Protection Zone
+# TODO add header, info text, appropriate CSS
+tally_zone_graph = wrap_in_section(
+    [
+        zone_dropdown_field,
+        html.Div(
+            className="graph", children=[dcc.Graph(id="tally-zone", config=fig_configs)]
+        ),
+        range_slider_field_zone,
+    ]
+)
+
+# Daily Tally by Year/Protection Zone
+# TODO add header info text, appropriate CSS
 year_zone_graph = wrap_in_section(
     [
-        html.H3("Daily tally by year", className="title is-4"),
-        html.P(
-            """
-This chart shows the daily tally for each protection area for a given year.  Use the selector to choose a year.  These data are still being updated and not all years may be present yet.
-        """,
-            className="content is-size-5",
-        ),
         year_dropdown_field,
         html.Div(
             className="graph", children=[dcc.Graph(id="tally-year", config=fig_configs)]
@@ -247,16 +234,45 @@ UA is an AA/EO employer and educational institution and prohibits illegal discri
     ],
 )
 
+about = html.Div(
+    className="section about content is-size-5",
+    children=[
+        dcc.Markdown(
+            """
+
+This chart compares the current year's daily tally of acres burned to all high fire years (> 1 million acres burned) since daily tally records began in 2004.  Click camera icon at upper right of diagram to download chart.
+
+"""
+        )
+    ],
+)
+
+after_chart = html.Div(
+    className="section about-after content is-size-5",
+    children=[
+        dcc.Markdown(
+            """
+
+ * Daily tallies go up or down as improved estimates and data become available throughout the fire season.
+ * Data provided by the [Alaska Interagency Coordination Center (AICC)](https://fire.ak.blm.gov).
+
+"""
+        )
+    ],
+)
+
 layout = html.Div(
     children=[
         header,
         html.Div(
+            className="container",
             children=[
                 about,
                 tally_graph,
                 tally_zone_graph,
                 year_zone_graph,
-            ]
+                after_chart,
+            ],
         ),
         footer,
     ]
