@@ -11,7 +11,7 @@ import luts
 import data
 from gui import layout
 
-app = dash.Dash(__name__, requests_pathname_prefix=os.environ["REQUESTS_PATHNAME_PREFIX"])
+app = dash.Dash(__name__)
 
 # AWS Elastic Beanstalk looks for application by default,
 # if this variable (application) isn't set you will get a WSGI error.
