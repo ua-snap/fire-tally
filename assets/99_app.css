@@ -50,6 +50,10 @@ a.header--snap-link {
 	padding-top: 0;
 }
 
+.hidden {
+	display: none;
+}
+
 #area {
 	max-width: 15rem;
 }
