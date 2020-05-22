@@ -4,14 +4,14 @@ Template for SNAP Dash apps.
 """
 import os
 from datetime import datetime
+import plotly.graph_objs as go
 import dash
 from dash.dependencies import Input, Output
-import plotly.graph_objs as go
 import luts
 import data
 from gui import layout
 
-app = dash.Dash(__name__, requests_pathname_prefix=os.environ["REQUESTS_PATHNAME_PREFIX"])
+app = dash.Dash(__name__)
 
 # AWS Elastic Beanstalk looks for application by default,
 # if this variable (application) isn't set you will get a WSGI error.
@@ -104,8 +104,8 @@ def get_line_mode(day_range):
 
 
 # Some reused configs in charts go here to reduce duplication.
-yaxis_conf = dict(title="Area burned (acres)")
-xaxis_conf = dict(tickformat="%B %-d")
+yaxis_conf = dict(title="Area burned (acres)", fixedrange=True,)
+xaxis_conf = dict(tickformat="%B %-d", fixedrange=True,)
 hover_conf = "%{y:,} acres"  # hover format (D3 language)
 
 
