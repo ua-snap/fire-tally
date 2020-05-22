@@ -5,6 +5,7 @@ Template for SNAP Dash apps.
 
 import os
 from datetime import datetime
+import statsmodels.api as sm
 import dash
 from dash.dependencies import Input, Output
 import plotly.graph_objs as go
@@ -120,6 +121,7 @@ tally_zone = preprocess_data(tally_zone_raw)
 
 # A few more fields/flags
 data_start_doy = 92  # April 1
+apply_loess = False  # This filter can fail unless it has enough data values.
 
 app = dash.Dash(__name__)
 
@@ -189,30 +191,6 @@ app.title = luts.title
 app.layout = layout
 
 
-def get_title_date_span(day_range):
-    """ Helper to build the string fragment stating time span in titles. """
-    return str(
-        datetime.strptime(str(day_range[0]), "%j").strftime("%B %-d")
-        + "—"
-        + datetime.strptime(str(day_range[1]), "%j").strftime("%B %-d")
-    )
-
-
-def get_line_mode(day_range):
-    """
-
-    Returns "line" if day range is less than a
-    certain threshold, otherwise "spline".  This
-    prevents the charts from doing spline interpolation
-    when heavily zoomed-in, which looks really bad.
-
-    """
-    if day_range[1] - day_range[0] > 90:
-        return "spline"
-
-    return "line"
-
-
 @app.callback(Output("tally", "figure"), [Input("day_range", "value")])
 def update_tally(day_range):
     """ Generate daily tally count """
@@ -225,6 +203,24 @@ def update_tally(day_range):
     for name, group in grouped:
         group = group.sort_values(["date_stacked"])
 
+        # Apply LOESS filter to smooth the data.
+        # https://www.statsmodels.org/dev/generated/statsmodels.nonparametric.smoothers_lowess.lowess.html
+        # TODO this will throw warnings if the date range is small,
+        # consider disabling for smaller (~45) day spans, or something.
+        group = group.assign(
+            SmoothedTotalAcres=sm.nonparametric.lowess(
+                group.TotalAcres,
+                group.date_stacked,
+                return_sorted=False,
+                frac=0.05,
+                it=1,
+                delta=3,
+            )
+        )
+        group["SmoothedTotalAcres"] = group["SmoothedTotalAcres"].apply(
+            lambda x: x if x >= 0 else 0
+        )
+
         if name in luts.important_years:
             hoverinfo = ""
             showlegend = True
@@ -236,12 +232,12 @@ def update_tally(day_range):
             [
                 {
                     "x": group.date_stacked,
-                    "y": group.TotalAcres,
+                    "y": group.SmoothedTotalAcres,
                     "mode": "lines",
                     "name": str(name),
                     "line": {
                         "color": luts.years_lines_styles[str(name)]["color"],
-                        "shape": get_line_mode(day_range),
+                        "shape": "spline",
                         "width": luts.years_lines_styles[str(name)]["width"],
                     },
                     "showlegend": showlegend,
@@ -268,7 +264,9 @@ def update_tally(day_range):
 
     graph_layout = go.Layout(
         title="<b>Alaska Statewide Daily Tally Records, 2004-Present,</b><br>"
-        + get_title_date_span(day_range),
+        + datetime.strptime(str(day_range[0]), "%j").strftime("%B %-d")
+        + "—"
+        + datetime.strptime(str(day_range[1]), "%j").strftime("%B %-d"),
         showlegend=True,
         legend={"font": {"family": "Open Sans", "size": 10}},
         xaxis=dict(title="Date", tickformat="%B %-d"),
@@ -283,28 +281,50 @@ def update_tally(day_range):
     return {"data": data_traces, "layout": graph_layout}
 
 
-@app.callback(
-    Output("tally-zone", "figure"),
-    [Input("area", "value"), Input("day_range_zone", "value")],
-)
-def update_tally_zone(area, day_range):
-    """ Generate daily tally count for specified protection area """
+@app.callback(Output("tally-zone", "figure"), [Input("area", "value")])
+def update_tally_zone(area):
+    """ Generate daily tally count """
 
-    #  Slice by day range.
-    sliced = tally_zone.loc[
-        (tally_zone.doy >= day_range[0]) & (tally_zone.doy <= day_range[1])
-    ]
+    # TODO -- add date range selector.
 
     # Spatial clip
     if area == "ALL":
-        de = sliced.groupby(["FireSeason", "doy", "date_stacked"]).sum().reset_index()
+        de = (
+            tally_zone.groupby(["FireSeason", "doy", "date_stacked"])
+            .sum()
+            .reset_index()
+        )
     else:
-        de = sliced.loc[(sliced["ProtectionUnit"] == area)]
+        de = tally_zone.loc[(tally_zone["ProtectionUnit"] == area)]
 
     data_traces = []
     grouped = de.groupby("FireSeason")
     for name, group in grouped:
         group = group.sort_values(["date_stacked"])
+
+        # If there's enough data points, smooth with LOESS.
+        # We don't quite know the full criteria for this, so leave the
+        # code in place but bypass for the moment.
+        # TODO resolve how/when this is used.
+        # Apply LOESS filter to smooth the data.
+        # https://www.statsmodels.org/dev/generated/statsmodels.nonparametric.smoothers_lowess.lowess.html
+        acres = group.TotalAcres
+        if apply_loess:
+            group = group.assign(
+                SmoothedTotalAcres=sm.nonparametric.lowess(
+                    group.TotalAcres,
+                    group.date_stacked,
+                    return_sorted=False,
+                    frac=0.05,
+                    it=1,
+                    delta=3,
+                )
+            )
+            # Handle some odd values that showed up in raw data.
+            group["SmoothedTotalAcres"] = group["SmoothedTotalAcres"].apply(
+                lambda x: x if x >= 0 else 0
+            )
+            acres = group.SmoothedTotalAcres
 
         # Only put high-fire years in the legend.
         if name in luts.important_years:
@@ -318,12 +338,16 @@ def update_tally_zone(area, day_range):
             [
                 {
                     "x": group.date_stacked,
-                    "y": group.TotalAcres,
+                    "y": acres,
                     "mode": "lines",
-                    "name": name,
+                    "name": str(name),
                     "line": {
                         "color": luts.years_lines_styles[str(name)]["color"],
-                        "shape": get_line_mode(day_range),
+                        # "shape": "spline",
+                        # ^ TODO determine if/when to restore this,
+                        # after figuring out the LOESS stuff.
+                        # It can either look much better or much
+                        # worse depending on the shape of the data.
                         "width": luts.years_lines_styles[str(name)]["width"],
                     },
                     "showlegend": showlegend,
@@ -349,55 +373,76 @@ def update_tally_zone(area, day_range):
     )
 
     graph_layout = go.Layout(
-        title="<b>Daily Tally Records, "
-        + luts.zones[area]
-        + ", 2004-Present</b><br>"
-        + get_title_date_span(day_range),
+        title="Daily Tally Records, 2004-Present",
         showlegend=True,
         legend={"font": {"family": "Open Sans", "size": 10}},
         xaxis=dict(title="Date", tickformat="%B %-d"),
         yaxis={"title": "Acres burned", "hoverformat": ".3s"},
+        height=650,
         margin={"l": 50, "r": 50, "b": 50, "t": 50, "pad": 4},
     )
     return {"data": data_traces, "layout": graph_layout}
 
 
-@app.callback(
-    Output("tally-year", "figure"),
-    [Input("year", "value"), Input("day_range_year", "value")],
-)
-def update_year_zone(year, day_range):
+@app.callback(Output("tally-year", "figure"), [Input("year", "value")])
+def update_year_zone(year):
     """ Generate daily tally count by area/year """
 
-    # Clip to day range
-    sliced = tally_zone.loc[
-        (tally_zone.doy >= day_range[0]) & (tally_zone.doy <= day_range[1])
-    ]
+    # TODO -- add date range selector.
 
-    # Subset by selected year.
-    de = sliced.loc[(sliced.FireSeason == year)]
+    de = tally_zone.loc[(tally_zone.FireSeason == year)]
 
     data_traces = []
     grouped = de.groupby("ProtectionUnit")
     for name, group in grouped:
         group = group.sort_values(["date_stacked"])
+
+        # If there's enough data points, smooth with LOESS.
+        # We don't quite know the full criteria for this, so leave the
+        # code in place but bypass for the moment.
+        # TODO resolve how/when this is used.
+        # Apply LOESS filter to smooth the data.
+        # https://www.statsmodels.org/dev/generated/statsmodels.nonparametric.smoothers_lowess.lowess.html
+        acres = group.TotalAcres
+        if apply_loess:
+            group = group.assign(
+                SmoothedTotalAcres=sm.nonparametric.lowess(
+                    group.TotalAcres,
+                    group.date_stacked,
+                    return_sorted=False,
+                    frac=0.05,
+                    it=1,
+                    delta=3,
+                )
+            )
+            # Handle some odd values that showed up in raw data.
+            group["SmoothedTotalAcres"] = group["SmoothedTotalAcres"].apply(
+                lambda x: x if x >= 0 else 0
+            )
+            acres = group.SmoothedTotalAcres
+
         data_traces.extend(
             [
                 {
                     "x": group.date_stacked,
-                    "y": group.TotalAcres,
+                    "y": acres,
                     "mode": "lines",
                     "name": luts.zones[name],
-                    "line": {"shape": get_line_mode(day_range), "width": 2},
+                    "line": {
+                        # "color": luts.years_lines_styles[str(name)]["color"],
+                        # "shape": "spline",
+                        # ^ TODO determine if/when to restore this,
+                        # after figuring out the LOESS stuff.
+                        # It can either look much better or much
+                        # worse depending on the shape of the data.
+                        "width": 2,
+                    }
                 }
             ]
         )
 
     graph_layout = go.Layout(
-        title="<b>Daily Tally Records by Protection Area, "
-        + str(year)
-        + "</b><br>"
-        + get_title_date_span(day_range),
+        title="Daily Tally Records, 2004-Present",
         showlegend=True,
         legend={"font": {"family": "Open Sans", "size": 10}},
         xaxis=dict(title="Date", tickformat="%B %-d"),

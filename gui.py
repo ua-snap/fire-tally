@@ -78,50 +78,30 @@ header = html.Div(
     ],
 )
 
-
-def get_day_range_slider(element_id):
-    """
-    Helper to create day range sliders.
-    `id` becomes the ID of the slider element.
-    """
-
-    # Control which allows user to specify a date range.
-    # Mark the steps by day of year.
-    date_ranges = [
-        luts.get_doy(4, 1),
-        luts.get_doy(5, 1),
-        luts.get_doy(5, 1),
-        luts.get_doy(6, 1),
-        luts.get_doy(7, 1),
-        luts.get_doy(8, 1),
-        luts.get_doy(9, 1),
-    ]
-    date_names = list(
-        map(lambda x: datetime.strptime(str(x), "%j").strftime("%-B"), date_ranges)
-    )
-    date_marks = dict(zip(date_ranges, date_names))
-    range_slider = dcc.RangeSlider(
-        id=element_id,
-        marks=date_marks,
-        count=1,
-        min=91,
-        max=275,
-        step=1,
-        pushable=45,  # minimum date range span
-        value=[luts.default_date_range[0], luts.default_date_range[1]],
-    )
-    return html.Div(
-        className="field",
-        children=[
-            html.Label("Select date range", className="label"),
-            html.Div(className="control", children=[range_slider]),
-        ],
-    )
-
-
-range_slider_field = get_day_range_slider("day_range")
-range_slider_field_zone = get_day_range_slider("day_range_zone")
-range_slider_field_year = get_day_range_slider("day_range_year")
+# Control which allows user to specify a date range.
+# Mark the steps by day of year.
+date_ranges = [91, 121, 152, 182, 213, 243, 275]
+date_names = list(
+    map(lambda x: datetime.strptime(str(x), "%j").strftime("%-B"), date_ranges)
+)
+date_marks = dict(zip(date_ranges, date_names))
+range_slider = dcc.RangeSlider(
+    id="day_range",
+    marks=date_marks,
+    count=1,
+    min=91,
+    max=275,
+    step=1,
+    pushable=45,  # minimum date range span
+    value=[luts.default_date_range[0], luts.default_date_range[1]],
+)
+range_slider_field = html.Div(
+    className="field",
+    children=[
+        html.Label("Select date range", className="label"),
+        html.Div(className="control", children=[range_slider]),
+    ],
+)
 
 # Control which lets user choose a protection area/management zone
 zone_dropdown = dcc.Dropdown(
@@ -174,7 +154,6 @@ def wrap_in_section(content):
 
 # Daily Tally, statewide only
 # TODO add header, info text, appropriate CSS
-# TODO ensure all graph sizes are specified with height/widths
 tally_graph = wrap_in_section(
     [dcc.Graph(id="tally", config=fig_configs), range_slider_field]
 )
@@ -187,7 +166,6 @@ tally_zone_graph = wrap_in_section(
         html.Div(
             className="graph", children=[dcc.Graph(id="tally-zone", config=fig_configs)]
         ),
-        range_slider_field_zone,
     ]
 )
 
@@ -199,7 +177,6 @@ year_zone_graph = wrap_in_section(
         html.Div(
             className="graph", children=[dcc.Graph(id="tally-year", config=fig_configs)]
         ),
-        range_slider_field_year,
     ]
 )
 
@@ -265,13 +242,7 @@ layout = html.Div(
         header,
         html.Div(
             className="container",
-            children=[
-                about,
-                tally_graph,
-                tally_zone_graph,
-                year_zone_graph,
-                after_chart,
-            ],
+            children=[about, tally_graph, tally_zone_graph, year_zone_graph, after_chart],
         ),
         footer,
     ]

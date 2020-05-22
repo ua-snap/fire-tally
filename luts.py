@@ -3,20 +3,12 @@
 Common shared text strings and lookup tables.
 """
 
-from datetime import date
-
 title = "Alaska Wildfire Daily Tally Count, 2004-Present"
 url = "http://snap.uaf.edu/tools/demo"
 preview = "http://snap.uaf.edu/tools/demo/assets/preview.png"
 description = "This visualization compares the current year to all high fire years (> 1 million acres burned) since daily tally records began in 2004."
 
-
-def get_doy(month, day):
-    """ Return DOY from month/day """
-    return int(date(date.today().year, month, day).strftime("%j"))
-
-
-default_date_range = [get_doy(4, 1), get_doy(9, 16)]
+default_date_range = [91, 260]
 
 default_style = {"color": "rgba(0, 0, 0, 0.25)", "width": 1}
 
