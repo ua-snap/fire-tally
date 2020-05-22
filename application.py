@@ -196,6 +196,14 @@ def update_tally_zone(area, day_range):
     for name, group in grouped:
         group = group.sort_values(["date_stacked"])
 
+        # Only put high-fire years in the legend.
+        if name in luts.important_years:
+            hoverinfo = ""
+            showlegend = True
+        else:
+            hoverinfo = "skip"
+            showlegend = False
+
         data_traces.extend(
             [
                 {
@@ -208,7 +216,8 @@ def update_tally_zone(area, day_range):
                         "shape": get_line_mode(day_range),
                         "width": luts.years_lines_styles[str(name)]["width"],
                     },
-                    "hovertemplate": hover_conf,
+                    "showlegend": showlegend,
+                    "hoverinfo": hoverinfo,
                 }
             ]
         )
