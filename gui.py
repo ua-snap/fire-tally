@@ -252,7 +252,7 @@ footer = html.Footer(
     <div class="wrapper is-size-6">
         <img src="{path_prefix}assets/UAF.svg"/>
         <div class="wrapped">
-            <p>The Alaska Wildfire Daily Tally Count was developed from data provided by the <a href="https://afs.ak.blm.gov/" target="_blank">Alaska Fire Service AK Bureau of Land Management</a>. This website was developed by the <a href="https://www.frames.gov/afsc/home">Alaska Fire Science Consortium (AFSC)</a> and the <a href="https://www.snap.uaf.edu/" title="👍">Scenarios Network for Alaska and Arctic Planning (SNAP)</a>, research groups at the <a href="https://uaf-iarc.org/">International Arctic Research Center (IARC)</a> at the <a href="https://uaf.edu/uaf/">University of Alaska Fairbanks (UAF)</a>.</p>
+            <p>The Alaska Wildfire Daily Tally Count was developed from data provided by the <a href="https://fire.ak.blm.gov/predsvcs/maps.php">Alaska Interagency Coordination Center (AICC)</a>. This website was developed by the <a href="https://www.frames.gov/afsc/home">Alaska Fire Science Consortium (AFSC)</a> and the <a href="https://www.snap.uaf.edu/" title="👍">Scenarios Network for Alaska and Arctic Planning (SNAP)</a>, research groups at the <a href="https://uaf-iarc.org/">International Arctic Research Center (IARC)</a> at the <a href="https://uaf.edu/uaf/">University of Alaska Fairbanks (UAF)</a>.</p>
             <p>Copyright &copy; {current_year} University of Alaska Fairbanks.  All rights reserved.</p>
             <p>UA is an AA/EO employer and educational institution and prohibits illegal discrimination against any individual.  <a href="https://www.alaska.edu/nondiscrimination/">Statement of Nondiscrimination</a></p>
         </div>
