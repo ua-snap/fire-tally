@@ -191,7 +191,12 @@ def update_tally_zone(area, day_range):
 
     # Spatial clip
     if area == "ALL":
-        de = sliced.groupby(["FireSeason", "doy", "date_stacked"]).sum().reset_index()
+        de = (
+            sliced.groupby(["FireSeason", "doy", "date_stacked"])
+            .sum()
+            .reset_index()
+            .round(2)
+        )
     else:
         de = sliced.loc[(sliced["ProtectionUnit"] == area)]
 
