@@ -9,9 +9,9 @@ import dash
 from dash.dependencies import Input, Output
 import luts
 import data
-from gui import layout
+from gui import layout, path_prefix
 
-app = dash.Dash(__name__,requests_pathname_prefix=os.environ["REQUESTS_PATHNAME_PREFIX"])
+app = dash.Dash(__name__, requests_pathname_prefix=path_prefix)
 
 # AWS Elastic Beanstalk looks for application by default,
 # if this variable (application) isn't set you will get a WSGI error.
@@ -199,7 +199,7 @@ def update_tally_zone(area, day_range):
     grouped = de.groupby("FireSeason")
     for name, group in grouped:
         group = group.sort_values(["date_stacked"])
-
+        group["TotalAcres"] = group["TotalAcres"].round(2)
         data_traces.extend(
             [
                 {
@@ -264,6 +264,7 @@ def update_year_zone(year, day_range):
     grouped = de.groupby("ProtectionUnit")
     for name, group in grouped:
         group = group.sort_values(["date_stacked"])
+        group["TotalAcres"] = group["TotalAcres"].round(2)
         data_traces.extend(
             [
                 {

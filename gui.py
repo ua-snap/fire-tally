@@ -128,7 +128,7 @@ header = ddsih.DangerouslySetInnerHTML(
     <div class="navbar-end">
       <div class="navbar-item">
         <div class="buttons">
-          <a target="_blank" rel="noopener noreferrer" href="https://uaf-iarc.typeform.com/to/UCZcRB" class="button is-primary">
+          <a target="_blank" rel="noopener noreferrer" href="https://uaf-iarc.typeform.com/to/mN7J5cCK#tool=Alaska%20Fire%20Tally" class="button is-link">
             <strong>Feedback</strong>
           </a>
         </div>
@@ -244,30 +244,20 @@ This chart shows the daily tally for each protection area for a given year.  The
 current_year = datetime.now().year
 
 footer = html.Footer(
-    className="footer has-text-centered",
+    className="footer",
     children=[
-        html.Div(
-            children=[
-                html.A(
-                    href="https://www.frames.gov/afsc/home",
-                    children=[html.Img(src=path_prefix + "assets/AFSC_color.svg")],
-                ),
-                html.A(
-                    href="https://snap.uaf.edu",
-                    className="snap",
-                    children=[html.Img(src=path_prefix + "assets/SNAP_color_all.svg")],
-                ),
-                html.A(
-                    href="https://uaf.edu/uaf/",
-                    children=[html.Img(src=path_prefix + "assets/UAF.svg")],
-                ),
-            ]
-        ),
         ddsih.DangerouslySetInnerHTML(
             f"""
-<p>UA is an AA/EO employer and educational institution and prohibits illegal discrimination against any individual.
-<br><a href="https://www.alaska.edu/nondiscrimination/">Statement of Nondiscrimination</a></p>
-<p class="copyright">Copyright &copy; {current_year} University of Alaska Fairbanks.  All rights reserved.</p>
+<div class="container">
+    <div class="wrapper is-size-6">
+        <img src="{path_prefix}assets/UAF.svg"/>
+        <div class="wrapped">
+            <p>The Alaska Wildfire Daily Tally Count was developed from data provided by the <a href="https://fire.ak.blm.gov/predsvcs/maps.php">Alaska Interagency Coordination Center (AICC)</a>. This website was developed by the <a href="https://www.frames.gov/afsc/home">Alaska Fire Science Consortium (AFSC)</a> and the <a href="https://www.snap.uaf.edu/" title="👍">Scenarios Network for Alaska and Arctic Planning (SNAP)</a>, research groups at the <a href="https://uaf-iarc.org/">International Arctic Research Center (IARC)</a> at the <a href="https://uaf.edu/uaf/">University of Alaska Fairbanks (UAF)</a>.</p>
+            <p>Copyright &copy; {current_year} University of Alaska Fairbanks.  All rights reserved.</p>
+            <p>UA is an AA/EO employer and educational institution and prohibits illegal discrimination against any individual.  <a href="https://www.alaska.edu/nondiscrimination/">Statement of Nondiscrimination</a></p>
+        </div>
+    </div>
+</div>
             """
         ),
     ],
