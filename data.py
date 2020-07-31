@@ -19,7 +19,7 @@ DASH_LOG_LEVEL = os.getenv("DASH_LOG_LEVEL", default="info")
 logging.basicConfig(level=getattr(logging, DASH_LOG_LEVEL.upper(), logging.INFO))
 
 # Set up cache.
-CACHE_EXPIRE = int(os.getenv("DASH_CACHE_EXPIRE", default="43200"))
+CACHE_EXPIRE = int(os.getenv("DASH_CACHE_EXPIRE", default="10"))
 logging.info("Cache expire set to %s seconds", CACHE_EXPIRE)
 cache_opts = {"cache.type": "memory"}
 cache = CacheManager(**parse_cache_config_options(cache_opts))
