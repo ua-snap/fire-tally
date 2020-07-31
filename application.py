@@ -199,7 +199,7 @@ def update_tally_zone(area, day_range):
     grouped = de.groupby("FireSeason")
     for name, group in grouped:
         group = group.sort_values(["date_stacked"])
-
+        group["TotalAcres"] = group["TotalAcres"].round(2)
         data_traces.extend(
             [
                 {
@@ -264,6 +264,7 @@ def update_year_zone(year, day_range):
     grouped = de.groupby("ProtectionUnit")
     for name, group in grouped:
         group = group.sort_values(["date_stacked"])
+        group["TotalAcres"] = group["TotalAcres"].round(2)
         data_traces.extend(
             [
                 {
