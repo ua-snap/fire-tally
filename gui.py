@@ -180,7 +180,7 @@ zone_dropdown = dcc.Dropdown(
     id="area",
     className="dropdown-selector",
     options=[{"label": luts.zones[key], "value": key} for key in luts.zones],
-    value="ALL",
+    value="CGF",
 )
 zone_dropdown_field = html.Div(
     className="field",
