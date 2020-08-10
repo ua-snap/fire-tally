@@ -42,19 +42,18 @@ years_lines_styles = {
 }
 
 zones = {
-    "ALL": "Statewide",
-    "MID": "Military Zone",
+    "CGF": "Chugach National Forest",
+    "CRS": "Copper River Area",
     "DAS": "Delta Area",
     "FAS": "Fairbanks Area",
-    "MSS": "Mat-Su Area",
-    "CRS": "Copper River Area",
-    "UYD": "Upper Yukon Zone",
-    "KKS": "Kenai/Kodiak Area",
-    "SWS": "Southwest Area",
-    "CGF": "Chugach National Forest",
     "GAD": "Galena Zone",
-    "TAS": "Tok Area",
     "HNS": "Haines Area",
+    "KKS": "Kenai/Kodiak Area",
+    "MID": "Military Zone",
+    "MSS": "Mat-Su Area",
+    "SWS": "Southwest Area",
     "TAD": "Tanana Zone",
+    "TAS": "Tok Area",
     "TNF": "Tongass National Forest",
+    "UYD": "Upper Yukon Zone",
 }
