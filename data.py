@@ -140,7 +140,7 @@ def fetch_api_data():
         tally_zone = preprocess_data(tally_zone_raw)
 
         # Compute what years are available in the tally zone file.
-        tally_zone_date_ranges = tally_zone.FireSeason.unique()
+        tally_zone_date_ranges = sorted(tally_zone.FireSeason.unique())
         logging.info("...data updated successfully.")
         return (tally, tally_zone, tally_zone_date_ranges)
 
