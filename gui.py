@@ -249,12 +249,16 @@ footer = html.Footer(
         ddsih.DangerouslySetInnerHTML(
             f"""
 <div class="container">
-    <div class="wrapper is-size-6">
-        <img src="{path_prefix}assets/UAF.svg"/>
-        <div class="wrapped">
-            <p>The Alaska Wildfire Daily Tally Count was developed from data provided by the <a href="https://fire.ak.blm.gov/predsvcs/maps.php">Alaska Interagency Coordination Center (AICC)</a>. This website was developed by the <a href="https://www.frames.gov/afsc/home">Alaska Fire Science Consortium (AFSC)</a> and the <a href="https://www.snap.uaf.edu/" title="👍">Scenarios Network for Alaska and Arctic Planning (SNAP)</a>, research groups at the <a href="https://uaf-iarc.org/">International Arctic Research Center (IARC)</a> at the <a href="https://uaf.edu/uaf/">University of Alaska Fairbanks (UAF)</a>.</p>
+    <div class="columns">
+        <div class="logo column is-one-fifth">
+            <img src="{path_prefix}assets/UAF.svg" alt="UAF Logo" />
+        </div>
+        <div class="column is-four-fifths">
+            <p>The Alaska Wildfire Daily Tally Count was developed from data provided by the <a href="https://fire.ak.blm.gov/predsvcs/maps.php">Alaska Interagency Coordination Center</a>. This website was developed by the <a href="https://www.frames.gov/afsc/home">Alaska Fire Science Consortium</a> and the <a href="https://www.snap.uaf.edu/" title="SNAP 👍">Scenarios Network for Alaska and Arctic Planning</a>, research groups at the <a href="https://uaf-iarc.org/">International Arctic Research Center</a>.</p>
             <p>Copyright &copy; {current_year} University of Alaska Fairbanks.  All rights reserved.</p>
-            <p>UA is an AA/EO employer and educational institution and prohibits illegal discrimination against any individual.  <a href="https://www.alaska.edu/nondiscrimination/">Statement of Nondiscrimination</a></p>
+            <p>UA is an AA/EO employer and educational institution and prohibits illegal discrimination against any individual. <a href="https://www.alaska.edu/nondiscrimination/"
+              >Statement of Nondiscrimination</a> and <a href="https://www.alaska.edu/records/records/compliance/gdpr/ua-privacy-statement/">Privacy Statement</a>
+            </p>
         </div>
     </div>
 </div>

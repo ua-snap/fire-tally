@@ -68,7 +68,7 @@ def collapse_year(date):
 
     try:
         d = datetime.strptime(str(date), "%Y%m%d")
-        d = d.replace(year=2020)
+        d = d.replace(year=2021)
     except ValueError:
         # Invalid date, return a null to be dropped
         logging.error("Invalid date found, %s", date)
@@ -140,7 +140,7 @@ def fetch_api_data():
         tally_zone = preprocess_data(tally_zone_raw)
 
         # Compute what years are available in the tally zone file.
-        tally_zone_date_ranges = tally_zone.FireSeason.unique()
+        tally_zone_date_ranges = sorted(tally_zone.FireSeason.unique())
         logging.info("...data updated successfully.")
         return (tally, tally_zone, tally_zone_date_ranges)
 
