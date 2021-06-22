@@ -57,4 +57,5 @@ zones = {
     "TAS": "Tok Area",
     "TNF": "Tongass National Forest",
     "UYD": "Upper Yukon Zone",
+    "UYT": "Upper Yukon / Tanana",
 }
