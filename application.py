@@ -9,9 +9,9 @@ import dash
 from dash.dependencies import Input, Output
 import luts
 import data
-from gui import layout, path_prefix
+from gui import layout
 
-app = dash.Dash(__name__, requests_pathname_prefix=path_prefix)
+app = dash.Dash(__name__)
 
 # AWS Elastic Beanstalk looks for application by default,
 # if this variable (application) isn't set you will get a WSGI error.

@@ -14,7 +14,7 @@ import data
 (tally, tally_zone, tally_zone_date_ranges) = data.fetch_data()
 
 # For hosting
-path_prefix = os.getenv("REQUESTS_PATHNAME_PREFIX") or "/"
+path_prefix = os.getenv("DASH_REQUESTS_PATHNAME_PREFIX") or "/"
 
 # Used to make the chart exports nice
 fig_download_configs = dict(

@@ -41,7 +41,7 @@ eb deploy
 
 The following env vars must be set:
 
- * `REQUESTS_PATHNAME_PREFIX` - URL fragment so requests are properly routed.
+ * `DASH_REQUESTS_PATHNAME_PREFIX` - URL fragment so requests are properly routed.
  * `GTAG_ID` - Google Tag Manager ID
 
 For local development, set `FLASK_DEBUG` to `True`.  This will use a local file for source data and enable other debugging tools.
