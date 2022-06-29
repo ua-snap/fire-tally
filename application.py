@@ -136,7 +136,7 @@ def update_tally(day_range):
             [
                 {
                     "x": group.date_stacked,
-                    "y": group.TotalAcres,
+                    "y": round(group.TotalAcres),
                     "mode": "lines",
                     "name": str(name),
                     "line": {
@@ -201,7 +201,7 @@ def update_tally_zone(area, day_range):
             [
                 {
                     "x": group.date_stacked,
-                    "y": group.TotalAcres,
+                    "y": round(group.TotalAcres),
                     "mode": "lines",
                     "name": name,
                     "line": {
@@ -266,7 +266,7 @@ def update_year_zone(year, day_range):
             [
                 {
                     "x": group.date_stacked,
-                    "y": group.TotalAcres,
+                    "y": round(group.TotalAcres),
                     "mode": "lines",
                     "name": luts.zones[name],
                     "line": {"shape": get_line_mode(day_range), "width": 2},
