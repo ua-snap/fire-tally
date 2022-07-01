@@ -172,6 +172,8 @@ def update_tally(day_range):
         + get_title_date_span(day_range),
         xaxis=xaxis_conf,
         yaxis=yaxis_conf,
+        hovermode="x unified",
+        hoverdistance=1,
     )
     return {"data": data_traces, "layout": graph_layout}
 
@@ -237,6 +239,8 @@ def update_tally_zone(area, day_range):
         + get_title_date_span(day_range),
         xaxis=xaxis_conf,
         yaxis=yaxis_conf,
+        hovermode="x unified",
+        hoverdistance=1,
     )
     return {"data": data_traces, "layout": graph_layout}
 
@@ -282,6 +286,8 @@ def update_year_zone(year, day_range):
         + get_title_date_span(day_range),
         xaxis=xaxis_conf,
         yaxis=yaxis_conf,
+        hovermode="x unified",
+        hoverdistance=1,
     )
     return {"data": data_traces, "layout": graph_layout}
 
