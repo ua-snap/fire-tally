@@ -133,8 +133,6 @@ def fetch_api_data():
                 "OutFires",
                 "ActiveFires",
                 "TotalFires",
-                "PrepLevel",
-                "StaffedFires",
             ]
         )
         tally_zone = preprocess_data(tally_zone_raw)
@@ -152,5 +150,5 @@ def fetch_api_data():
 
 
 def fetch_data():
-    """ Check cache for data & fetch from API if not present """
+    """Check cache for data & fetch from API if not present"""
     return data_cache.get(key="api_data", createfunc=fetch_api_data)
