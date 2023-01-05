@@ -259,6 +259,8 @@ footer = html.Footer(
             <p>UA is an AA/EO employer and educational institution and prohibits illegal discrimination against any individual. <a href="https://www.alaska.edu/nondiscrimination/"
               >Statement of Nondiscrimination</a> and <a href="https://www.alaska.edu/records/records/compliance/gdpr/ua-privacy-statement/">Privacy Statement</a>
             </p>
+            <p>UA is committed to providing accessible websites.  <a href="https://www.alaska.edu/webaccessibility/">Learn more about UA&rsquo;s notice of web accessibility</a>.  If we can help you access this website’s content, email us at <a href="mailto:uaf-snap-data-tools@alaska.edu">uaf-snap-data-tools@alaska.edu</a>!
+            </p>
         </div>
     </div>
 </div>
