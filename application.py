@@ -17,21 +17,11 @@ app = dash.Dash(__name__)
 # if this variable (application) isn't set you will get a WSGI error.
 application = app.server
 
-# Customize this layout to include Google Analytics
-gtag_id = os.getenv("GTAG_ID", default="")
 app.index_string = f"""
 <!DOCTYPE html>
 <html>
     <head>
-        <!-- Global site tag (gtag.js) - Google Analytics -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id={gtag_id}"></script>
-        <script>
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){{dataLayer.push(arguments);}}
-          gtag('js', new Date());
-
-          gtag('config', '{gtag_id}');
-        </script>
+        
         {{%metas%}}
         <title>{{%title%}}</title>
         <meta charset="utf-8"/>
@@ -63,6 +53,12 @@ app.index_string = f"""
         <link rel="canonical" href="{luts.url}"/>
         {{%favicon%}}
         {{%css%}}
+        <script async defer 
+            data-website-id="03f1aa4a-4f5d-49e1-b69e-837c38bc0af7"
+            src="http://umami.snap.uaf.edu/umami.js"
+            data-do-not-track="true">
+        </script>
+          
     </head>
     <body>
         {{%app_entry%}}
@@ -80,7 +76,7 @@ app.layout = layout
 
 
 def get_title_date_span(day_range):
-    """ Helper to build the string fragment stating time span in titles. """
+    """Helper to build the string fragment stating time span in titles."""
     return str(
         datetime.strptime(str(day_range[0]), "%j").strftime("%B %-d")
         + "—"
@@ -104,14 +100,20 @@ def get_line_mode(day_range):
 
 
 # Some reused configs in charts go here to reduce duplication.
-yaxis_conf = dict(title="Area burned (acres)", fixedrange=True,)
-xaxis_conf = dict(tickformat="%B %-d", fixedrange=True,)
+yaxis_conf = dict(
+    title="Area burned (acres)",
+    fixedrange=True,
+)
+xaxis_conf = dict(
+    tickformat="%B %-d",
+    fixedrange=True,
+)
 hover_conf = "%{y:,} acres"  # hover format (D3 language)
 
 
 @app.callback(Output("tally", "figure"), [Input("day_range", "value")])
 def update_tally(day_range):
-    """ Generate daily tally count """
+    """Generate daily tally count"""
 
     (tally, tally_zone, tally_zone_date_ranges) = data.fetch_data()
     data_traces = []
@@ -183,7 +185,7 @@ def update_tally(day_range):
     [Input("area", "value"), Input("day_range_zone", "value")],
 )
 def update_tally_zone(area, day_range):
-    """ Generate daily tally count for specified protection area """
+    """Generate daily tally count for specified protection area"""
     (tally, tally_zone, tally_zone_date_ranges) = data.fetch_data()
 
     #  Slice by day range.
@@ -250,7 +252,7 @@ def update_tally_zone(area, day_range):
     [Input("year", "value"), Input("day_range_year", "value")],
 )
 def update_year_zone(year, day_range):
-    """ Generate daily tally count by area/year """
+    """Generate daily tally count by area/year"""
     (tally, tally_zone, tally_zone_date_ranges) = data.fetch_data()
 
     # Clip to day range
