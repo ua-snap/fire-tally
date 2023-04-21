@@ -12,7 +12,7 @@ description = "This visualization compares the current year to all high fire yea
 
 
 def get_doy(month, day):
-    """ Return DOY from month/day """
+    """Return DOY from month/day"""
     return int(date(date.today().year, month, day).strftime("%j"))
 
 
@@ -20,7 +20,7 @@ default_date_range = [get_doy(4, 1), get_doy(9, 16)]
 
 default_style = {"color": "rgba(0, 0, 0, 0.25)", "width": 1}
 
-important_years = [2004, 2005, 2009, 2010, 2013, 2015, 2019, 2022]
+important_years = [2004, 2005, 2009, 2010, 2013, 2015, 2019, 2022, 2023]
 years_lines_styles = {
     "2004": {"color": "rgba(100, 143, 255, 1)", "width": "2"},
     "2005": {"color": "rgba(120, 94, 240, 1)", "width": "2"},
@@ -40,7 +40,8 @@ years_lines_styles = {
     "2019": {"color": "rgba(10, 255, 128, 1)", "width": "2"},
     "2020": default_style,
     "2021": default_style,
-    "2022": {"color": "rgba(10, 25, 0, .85)", "width": "4"},
+    "2022": {"color": "rgba(1, 98, 1, 1)", "width": "2"},
+    "2023": {"color": "rgba(10, 25, 0, .85)", "width": "4"},
 }
 
 zones = {
@@ -57,5 +58,5 @@ zones = {
     "TAD": "Tanana Zone",
     "TAS": "Tok Area",
     "TNF": "Tongass National Forest",
-    "UYD": "Upper Yukon Zone"
+    "UYD": "Upper Yukon Zone",
 }
