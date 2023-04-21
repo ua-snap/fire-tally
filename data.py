@@ -68,7 +68,7 @@ def collapse_year(date):
 
     try:
         d = datetime.strptime(str(date), "%Y%m%d")
-        d = d.replace(year=2022)
+        d = d.replace(year=2023)
     except ValueError:
         # Invalid date, return a null to be dropped
         logging.error("Invalid date found, %s", date)
@@ -88,6 +88,8 @@ def preprocess_data(csv):
     df = df.assign(
         date_stacked=pd.to_datetime(df["SitReportDate"].apply(collapse_year))
     )
+    # Removes any columns coming from unnamed CSV columns in the data
+    df = df.loc[:, ~df.columns.str.startswith("Unnamed")]
     df = df.dropna()
     df = df.drop(columns=["SitReportDate"])
 
