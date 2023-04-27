@@ -85,21 +85,6 @@ def get_title_date_span(day_range):
     )
 
 
-def get_line_mode(day_range):
-    """
-
-    Returns "line" if day range is less than a
-    certain threshold, otherwise "spline".  This
-    prevents the charts from doing spline interpolation
-    when heavily zoomed-in, which looks really bad.
-
-    """
-    if day_range[1] - day_range[0] > 90:
-        return "spline"
-
-    return "line"
-
-
 # Some reused configs in charts go here to reduce duplication.
 yaxis_conf = dict(
     title="Area burned (acres)",
@@ -144,7 +129,6 @@ def update_tally(day_range):
                     "name": str(name),
                     "line": {
                         "color": luts.years_lines_styles[str(name)]["color"],
-                        "shape": get_line_mode(day_range),
                         "width": luts.years_lines_styles[str(name)]["width"],
                     },
                     "showlegend": showlegend,
@@ -211,7 +195,6 @@ def update_tally_zone(area, day_range):
                     "name": name,
                     "line": {
                         "color": luts.years_lines_styles[str(name)]["color"],
-                        "shape": get_line_mode(day_range),
                         "width": luts.years_lines_styles[str(name)]["width"],
                     },
                     "hovertemplate": hover_conf,
@@ -276,7 +259,7 @@ def update_year_zone(year, day_range):
                     "y": round(group.TotalAcres),
                     "mode": "lines",
                     "name": luts.zones[name],
-                    "line": {"shape": get_line_mode(day_range), "width": 2},
+                    "line": {"width": 2},
                     "hovertemplate": hover_conf,
                 }
             ]
