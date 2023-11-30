@@ -256,9 +256,7 @@ footer = html.Footer(
         <div class="column is-four-fifths">
             <p>The Alaska Wildfire Daily Tally Count was developed from data provided by the <a href="https://fire.ak.blm.gov/predsvcs/maps.php">Alaska Interagency Coordination Center</a>. This website was developed by the <a href="https://www.frames.gov/afsc/home">Alaska Fire Science Consortium</a> and the <a href="https://www.snap.uaf.edu/" title="SNAP 👍">Scenarios Network for Alaska and Arctic Planning</a>, research groups at the <a href="https://uaf-iarc.org/">International Arctic Research Center</a>.</p>
             <p>Copyright &copy; {current_year} University of Alaska Fairbanks.  All rights reserved.</p>
-            <p>UA is an AA/EO employer and educational institution and prohibits illegal discrimination against any individual. <a href="https://www.alaska.edu/nondiscrimination/"
-              >Statement of Nondiscrimination</a> and <a href="https://www.alaska.edu/records/records/compliance/gdpr/ua-privacy-statement/">Privacy Statement</a>
-            </p>
+            <p>UA is an affirmative action / equal opportunity employer, educational institution and provider, and prohibits illegal discrimination against any individual. <a href="https://www.alaska.edu/nondiscrimination/">Statement of Nondiscrimination</a> and <a href="https://www.alaska.edu/records/records/compliance/gdpr/ua-privacy-statement/">Privacy Statement</a></p>
             <p>UA is committed to providing accessible websites.  <a href="https://www.alaska.edu/webaccessibility/">Learn more about UA&rsquo;s notice of web accessibility</a>.  If we can help you access this website’s content, email us at <a href="mailto:uaf-snap-data-tools@alaska.edu">uaf-snap-data-tools@alaska.edu</a>!
             </p>
         </div>
