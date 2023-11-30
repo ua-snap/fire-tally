@@ -116,25 +116,8 @@ header = ddsih.DangerouslySetInnerHTML(
     <a class="navbar-item" href="https://www.snap.uaf.edu">
       <img src="{path_prefix}assets/SNAP_mapventures_header.svg">
     </a>
-
-    <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-    </a>
   </div>
 
-  <div class="navbar-menu">
-    <div class="navbar-end">
-      <div class="navbar-item">
-        <div class="buttons">
-          <a target="_blank" rel="noopener noreferrer" href="https://uaf-iarc.typeform.com/to/mN7J5cCK#tool=Alaska%20Fire%20Tally" class="button is-link">
-            <strong>Feedback</strong>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
 </nav>
 </div>
 """
