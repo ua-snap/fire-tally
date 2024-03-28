@@ -3,6 +3,7 @@
 Perform data pre-processing for the web app.
 
 """
+
 # pylint: disable=C0103,C0301,E0401
 
 import os
@@ -119,8 +120,6 @@ def fetch_api_data():
                 "LightningFires",
                 "LightningAcres",
                 "PrepLevel",
-                "Active Fires",
-                "Staffed Fires",
             ]
         )
         tally = preprocess_data(tally_raw)
