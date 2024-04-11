@@ -69,7 +69,7 @@ def collapse_year(date):
 
     try:
         d = datetime.strptime(str(date), "%Y%m%d")
-        d = d.replace(year=2023)
+        d = d.replace(year=2024)
     except ValueError:
         # Invalid date, return a null to be dropped
         logging.error("Invalid date found, %s", date)
