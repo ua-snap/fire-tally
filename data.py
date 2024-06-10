@@ -124,7 +124,10 @@ def fetch_api_data():
         )
         tally = preprocess_data(tally_raw)
 
-        tally_zone_raw = pd.read_csv(TALLY_DATA_ZONES_URL, parse_dates=True)
+        tally_zone_raw = pd.read_csv(
+            TALLY_DATA_ZONES_URL,
+            dtype={"FireSeason": "Int64", "SitReportDate": "Int64"},
+        )
         tally_zone_raw = tally_zone_raw.drop(
             columns=[
                 "ID",
