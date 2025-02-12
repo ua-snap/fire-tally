@@ -73,7 +73,7 @@ def collapse_year(date):
     except ValueError:
         # Invalid date, return a null to be dropped
         logging.error("Invalid date found, %s", date)
-        d = np.NaN
+        d = np.nan
 
     return d
 
