@@ -10,6 +10,8 @@ import os
 import ssl
 import traceback
 import logging
+import requests
+from io import StringIO
 from datetime import datetime
 import numpy as np
 import pandas as pd
@@ -108,7 +110,15 @@ def fetch_api_data():
     """
     logging.info("Updating data from upstream API...")
     try:
-        tally_raw = pd.read_csv(TALLY_DATA_URL, parse_dates=True)
+        # Make the response look like a browser to avoid 403 errors from CloudFlare
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+        }
+
+        response = requests.get(TALLY_DATA_URL, headers=headers, timeout=10)
+        response.raise_for_status()
+        tally_raw = pd.read_csv(StringIO(response.text), parse_dates=True)
+
         tally_raw = tally_raw.drop(
             columns=[
                 "ID",
@@ -124,10 +134,13 @@ def fetch_api_data():
         )
         tally = preprocess_data(tally_raw)
 
+        response = requests.get(TALLY_DATA_ZONES_URL, headers=headers, timeout=10)
+        response.raise_for_status()
         tally_zone_raw = pd.read_csv(
-            TALLY_DATA_ZONES_URL,
+            StringIO(response.text),
             dtype={"FireSeason": "Int64", "SitReportDate": "Int64"},
         )
+
         tally_zone_raw = tally_zone_raw.drop(
             columns=[
                 "ID",
@@ -146,11 +159,15 @@ def fetch_api_data():
         logging.info("...data updated successfully.")
         return (tally, tally_zone, tally_zone_date_ranges)
 
+    # Recommended exception handling for requests
+    except requests.exceptions.HTTPError as http_err:
+        logging.error(f"HTTP Error: {http_err}")
+    except requests.exceptions.RequestException as req_err:
+        logging.error(f"Request Error: {req_err}")
     except Exception as e:
-        # There could be a number of different network-
-        # or data-based errors, just ensure they're written
-        # to stdout logging.
         logging.error(traceback.format_exc())
+
+    return None
 
 
 def fetch_data():
