@@ -53,12 +53,12 @@ else:
     logging.info("Production mode.")
     TALLY_DATA_URL = os.getenv(
         "TALLY_DATA_URL",
-        default="https://fire.ak.blm.gov/content/aicc/Statistics%20Directory/Alaska%20Daily%20Stats%20-%202004%20to%20Present.csv",
+        default="https://fire.ak.blm.gov/content/aicc/Statistics%20Directory/Fire%20History%20and%20Stats/Alaska%20Daily%20Stats%20-%202004%20to%20Present.csv",
     )
     # Probably this: https://fire.ak.blm.gov/content/aicc/Statistics%20Directory/Alaska%20Daily%20Stats%20by%20Protection-2004%20to%20Present.csv
     TALLY_DATA_ZONES_URL = os.getenv(
         "TALLY_DATA_ZONES_URL",
-        default="https://fire.ak.blm.gov/content/aicc/Statistics%20Directory/Alaska%20Daily%20Stats%20by%20Protection-2004%20to%20Present.csv",
+        default="https://fire.ak.blm.gov/content/aicc/Statistics%20Directory/Fire%20History%20and%20Stats/Alaska%20Daily%20Stats%20by%20Protection-2004%20to%20Present.csv",
     )
 
 
