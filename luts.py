@@ -20,7 +20,7 @@ default_date_range = [get_doy(4, 1), get_doy(9, 16)]
 
 default_style = {"color": "rgba(0, 0, 0, 0.25)", "width": 1}
 
-important_years = [2004, 2005, 2009, 2010, 2013, 2015, 2019, 2022, 2024]
+important_years = [2004, 2005, 2009, 2010, 2013, 2015, 2019, 2022, 2025]
 years_lines_styles = {
     "2004": {"color": "rgba(100, 143, 255, 1)", "width": "2"},
     "2005": {"color": "rgba(120, 94, 240, 1)", "width": "2"},
@@ -42,7 +42,8 @@ years_lines_styles = {
     "2021": default_style,
     "2022": {"color": "rgba(1, 98, 1, 1)", "width": "2"},
     "2023": default_style,
-    "2024": {"color": "rgba(10, 25, 0, .85)", "width": "4"},
+    "2024": default_style,
+    "2025": {"color": "rgba(10, 25, 0, .85)", "width": "4"},
 }
 
 zones = {
